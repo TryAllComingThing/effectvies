@@ -186,14 +186,14 @@ const messages = ref([
   {
     id: 'm1',
     title: '绩效审核任务已处理完成',
-    description: '审核单 REV20260517001 已通过，请及时查看处理结果。',
+    description: '任务单 REV20260517001 已处理完成，请及时查看最新结果。',
     time: '2026-05-17 09:12:31',
     read: false,
   },
   {
     id: 'm2',
     title: '文件解析任务执行成功',
-    description: '本次导入文件已解析完成，相关数据已同步入库。',
+    description: '本次导入文件已解析完成，相关数据已完成同步。',
     time: '2026-05-17 09:03:18',
     read: false,
   },
@@ -207,14 +207,14 @@ const messages = ref([
   {
     id: 'm4',
     title: '语义词条已更新',
-    description: '分析语义词典完成一次更新，请核对关联模板。',
+    description: '分析词库已完成一次更新，请核对关联配置。',
     time: '2026-05-16 16:44:22',
     read: true,
   },
   {
     id: 'm5',
     title: '字典条目状态已变更',
-    description: '字典配置发生状态调整，请关注依赖业务。',
+    description: '字典条目状态已调整，请关注相关依赖配置。',
     time: '2026-05-16 15:09:56',
     read: true,
   },

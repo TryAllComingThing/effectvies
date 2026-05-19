@@ -36,7 +36,7 @@ const logs = Array.from({ length: 66 }, (_, i) => ({
   operator: `操作员${(i % 8) + 1}`,
   deptName: ['科室一', '科室二', '科室三'][i % 3],
   ip: `10.11.1.${(i % 30) + 10}`,
-  content: i % 2 === 0 ? '用户登录成功' : '执行了绩效审核操作',
+  content: i % 2 === 0 ? '用户登录成功' : '执行了数据处理操作',
   createdAt: now,
 }));
 
