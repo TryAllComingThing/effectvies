@@ -1,0 +1,116 @@
+import type { RouteRecordRaw } from 'vue-router';
+
+export interface AppRouteMeta {
+  title: string;
+  icon?: string;
+  requiresAuth?: boolean;
+  roles?: Array<'admin' | 'user'>;
+  permission?: string;
+}
+
+export type AppRouteRecordRaw = RouteRecordRaw & { meta: AppRouteMeta };
+
+export const appRoutes: AppRouteRecordRaw[] = [
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/dashboard/DashboardView.vue'),
+    meta: { title: '工作台', icon: 'LayoutDashboard', requiresAuth: true, roles: ['admin', 'user'] },
+  },
+  {
+    path: '/perf-files',
+    name: 'PerfFiles',
+    component: () => import('@/views/perf-file/PerfFileView.vue'),
+    meta: { title: '文件管理', icon: 'FileSpreadsheet', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/perf-files/log',
+    name: 'PerfFileLog',
+    component: () => import('@/views/perf-file/PerfFileLogView.vue'),
+    meta: { title: '解析日志', icon: 'FileText', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/perf-tasks',
+    name: 'PerfTasks',
+    component: () => import('@/views/perf-task/PerfTaskView.vue'),
+    meta: { title: '任务管理', icon: 'ListChecks', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/perf-review',
+    name: 'PerfReview',
+    component: () => import('@/views/perf-review/PerfReviewView.vue'),
+    meta: { title: '绩效审核', icon: 'ClipboardCheck', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/performance',
+    name: 'Performance',
+    component: () => import('@/views/performance/PerformanceView.vue'),
+    meta: { title: '绩效管理', icon: 'BarChart3', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/analysis/ask',
+    name: 'AnalysisAsk',
+    component: () => import('@/views/analysis/AnalysisAskView.vue'),
+    meta: { title: '智能问数', icon: 'MessageCircleQuestion', requiresAuth: true, roles: ['admin', 'user'] },
+  },
+  {
+    path: '/analysis/table',
+    name: 'AnalysisTable',
+    component: () => import('@/views/reports/ReportView.vue'),
+    meta: { title: '绩效报表', icon: 'Table2', requiresAuth: true, roles: ['admin', 'user'] },
+  },
+  {
+    path: '/analysis/report',
+    name: 'AnalysisReport',
+    component: () => import('@/views/reports/ReportView.vue'),
+    meta: { title: '绩效报告', icon: 'FileText', requiresAuth: true, roles: ['admin', 'user'] },
+  },
+  {
+    path: '/analysis/template',
+    name: 'AnalysisTemplate',
+    component: () => import('@/views/reports/ReportView.vue'),
+    meta: { title: '报告模板', icon: 'FileCog', requiresAuth: true, roles: ['admin', 'user'] },
+  },
+  {
+    path: '/system/users',
+    name: 'SystemUsers',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '用户管理', icon: 'Users', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/depts',
+    name: 'SystemDepts',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '科室管理', icon: 'Building2', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/roles',
+    name: 'SystemRoles',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '角色管理', icon: 'ShieldCheck', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/rules',
+    name: 'SystemRules',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '规则管理', icon: 'FileCode2', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/semantic',
+    name: 'SystemSemantic',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '语义管理', icon: 'BookOpenText', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/dicts',
+    name: 'SystemDicts',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '字典管理', icon: 'Database', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/logs',
+    name: 'SystemLogs',
+    component: () => import('@/views/system/SystemView.vue'),
+    meta: { title: '日志管理', icon: 'ScrollText', requiresAuth: true, roles: ['admin'] },
+  },
+];
