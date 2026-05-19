@@ -1,18 +1,40 @@
 <template>
-  <PageContainer title="绩效管理">
+  <PageContainer title="绩效总览">
     <template #actions>
       <el-space>
-        <el-button type="primary" v-permission="['admin']" @click="openCreate"><ActionIcon name="Plus" />新增</el-button>
-        <el-button v-permission="['admin']" @click="openEditBySelection"><ActionIcon name="Pencil" />编辑</el-button>
-        <el-button type="danger" plain :disabled="!selectedIds.length" v-permission="['admin']" @click="todo('删除')"><ActionIcon name="Trash2" />删除</el-button>
+        <el-button type="primary" v-permission="['admin']" @click="openCreate">
+          <ActionIcon name="Plus" />新增
+        </el-button>
+        <el-button v-permission="['admin']" @click="openEditBySelection">
+          <ActionIcon name="Pencil" />编辑
+        </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="!selectedIds.length"
+          v-permission="['admin']"
+          @click="todo('删除')"
+        >
+          <ActionIcon name="Trash2" />删除
+        </el-button>
       </el-space>
     </template>
 
     <el-form inline :model="query" class="query-row">
-      <el-form-item label="主题"><el-input v-model="query.title" clearable /></el-form-item>
-      <el-form-item label="路线"><el-input v-model="query.routeName" clearable /></el-form-item>
-      <el-form-item label="科室"><el-select v-model="query.deptName" clearable><el-option v-for="d in DEPT_OPTIONS" :key="d" :label="d" :value="d" /></el-select></el-form-item>
-      <el-form-item label="提出人"><el-input v-model="query.proposer" clearable /></el-form-item>
+      <el-form-item label="主题">
+        <el-input v-model="query.title" clearable placeholder="请输入主题" />
+      </el-form-item>
+      <el-form-item label="线路">
+        <el-input v-model="query.routeName" clearable placeholder="请输入线路" />
+      </el-form-item>
+      <el-form-item label="科室">
+        <el-select v-model="query.deptName" clearable placeholder="全部科室">
+          <el-option v-for="item in DEPT_OPTIONS" :key="item" :label="item" :value="item" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="提报人">
+        <el-input v-model="query.proposer" clearable placeholder="请输入提报人" />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="loadData"><ActionIcon name="Search" />查询</el-button>
         <el-button @click="resetQuery"><ActionIcon name="RotateCcw" />重置</el-button>
@@ -22,32 +44,46 @@
     <el-table v-loading="loading" :data="rows" size="small" @selection-change="onSelectionChange">
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
-      <el-table-column prop="title" label="主题" min-width="160" />
-      <el-table-column prop="routeName" label="路线" min-width="110" />
-      <el-table-column prop="deptName" label="科室" min-width="110" />
-      <el-table-column prop="proposer" label="提出人" min-width="100" />
-      <el-table-column prop="score" label="分数" width="80" />
-      <el-table-column prop="confidence" label="置信度" width="90" />
-      <el-table-column prop="matchedAt" label="匹配时间" min-width="160" />
+      <el-table-column prop="title" label="主题" min-width="180" />
+      <el-table-column prop="routeName" label="线路" min-width="120" />
+      <el-table-column prop="deptName" label="科室" min-width="120" />
+      <el-table-column prop="proposer" label="提报人" min-width="110" />
+      <el-table-column prop="score" label="分数" width="90" />
+      <el-table-column prop="confidence" label="置信度" width="100" />
+      <el-table-column prop="matchedAt" label="匹配时间" min-width="170" />
       <el-table-column label="操作" min-width="220" fixed="right">
         <template #default="scope">
           <el-space>
-            <el-button text type="primary" size="small" v-permission="['admin']" @click="openEdit(scope.row)"><ActionIcon name="Pencil" />编辑</el-button>
-            <el-button text type="primary" size="small" @click="openDetail(scope.row)"><ActionIcon name="Eye" />详情</el-button>
+            <el-button text type="primary" size="small" v-permission="['admin']" @click="openEdit(scope.row)">
+              <ActionIcon name="Pencil" />编辑
+            </el-button>
+            <el-button text type="primary" size="small" @click="openDetail(scope.row)">
+              <ActionIcon name="Eye" />详情
+            </el-button>
           </el-space>
         </template>
       </el-table-column>
     </el-table>
 
-    <div class="pager"><el-pagination v-model:current-page="query.pageNum" v-model:page-size="query.pageSize" :total="total" layout="total, sizes, prev, pager, next" :page-sizes="[10, 20, 50]" @current-change="loadData" @size-change="loadData" /></div>
+    <div class="pager">
+      <el-pagination
+        v-model:current-page="query.pageNum"
+        v-model:page-size="query.pageSize"
+        :total="total"
+        layout="total, sizes, prev, pager, next"
+        :page-sizes="[10, 20, 50]"
+        @current-change="loadData"
+        @size-change="loadData"
+      />
+    </div>
 
     <el-dialog v-model="editVisible" :title="editMode === 'create' ? '新增绩效' : '编辑绩效'" width="560px">
       <el-form :model="editForm" label-width="88px">
         <el-form-item label="主题"><el-input v-model="editForm.title" /></el-form-item>
         <el-form-item label="内容"><el-input v-model="editForm.content" type="textarea" :rows="3" /></el-form-item>
-        <el-form-item label="路线"><el-input v-model="editForm.routeName" /></el-form-item>
+        <el-form-item label="线路"><el-input v-model="editForm.routeName" /></el-form-item>
         <el-form-item label="科室"><el-input v-model="editForm.deptName" /></el-form-item>
-        <el-form-item label="提出人"><el-input v-model="editForm.proposer" /></el-form-item>
+        <el-form-item label="提报人"><el-input v-model="editForm.proposer" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="editVisible = false">取消</el-button>
@@ -55,13 +91,13 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="detailVisible" title="绩效详情" width="620px">
+    <el-dialog v-model="detailVisible" title="查看绩效详情" width="620px">
       <template v-if="detailItem">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="任务号">{{ detailItem.sourceTaskNo }}</el-descriptions-item>
-          <el-descriptions-item label="批号">{{ detailItem.sourceBatchNo }}</el-descriptions-item>
+          <el-descriptions-item label="批次号">{{ detailItem.sourceBatchNo }}</el-descriptions-item>
           <el-descriptions-item label="匹配时间">{{ detailItem.matchedAt }}</el-descriptions-item>
-          <el-descriptions-item label="提出人">{{ detailItem.proposer }}</el-descriptions-item>
+          <el-descriptions-item label="提报人">{{ detailItem.proposer }}</el-descriptions-item>
           <el-descriptions-item label="主题" :span="2">{{ detailItem.title }}</el-descriptions-item>
           <el-descriptions-item label="内容" :span="2">{{ detailItem.content }}</el-descriptions-item>
         </el-descriptions>
@@ -75,7 +111,8 @@ import { onMounted, reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import PageContainer from '@/components/common/PageContainer.vue';
 import ActionIcon from '@/components/common/ActionIcon.vue';
-import { DEPT_OPTIONS } from '@/utils/dept-options';import { getPerformanceList } from '@/api/review';
+import { DEPT_OPTIONS } from '@/utils/dept-options';
+import { getPerformanceList } from '@/api/review';
 import type { PerformanceItem } from '@/types';
 
 const loading = ref(false);
@@ -105,33 +142,45 @@ const resetQuery = () => {
   loadData();
 };
 
-const onSelectionChange = (s: PerformanceItem[]) => {
-  selectedIds.value = s.map((i) => i.id);
+const onSelectionChange = (items: PerformanceItem[]) => {
+  selectedIds.value = items.map((item) => item.id);
 };
 
-const todo = (n: string) => ElMessage.info(`${n}功能待对接`);
+const todo = (name: string) => ElMessage.info(`${name}功能待对接`);
+
 const openCreate = () => {
   editMode.value = 'create';
   Object.assign(editForm, { id: '', title: '', content: '', routeName: '', deptName: '', proposer: '' });
   editVisible.value = true;
 };
+
 const openEdit = (row: PerformanceItem) => {
   editMode.value = 'edit';
-  Object.assign(editForm, { id: row.id, title: row.title, content: row.content, routeName: row.routeName, deptName: row.deptName, proposer: row.proposer });
+  Object.assign(editForm, {
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    routeName: row.routeName,
+    deptName: row.deptName,
+    proposer: row.proposer,
+  });
   editVisible.value = true;
 };
+
 const openEditBySelection = () => {
-  const row = rows.value.find((i) => i.id === selectedIds.value[0]);
+  const row = rows.value.find((item) => item.id === selectedIds.value[0]);
   if (!row) {
     ElMessage.warning('请先选择一条数据');
     return;
   }
   openEdit(row);
 };
+
 const submitEdit = () => {
   ElMessage.success(editMode.value === 'create' ? '新增成功（模拟）' : '编辑成功（模拟）');
   editVisible.value = false;
 };
+
 const openDetail = (row: PerformanceItem) => {
   detailItem.value = row;
   detailVisible.value = true;
@@ -141,7 +190,17 @@ onMounted(loadData);
 </script>
 
 <style scoped>
-.query-row { margin-bottom: 0.7rem; }
-.pager { margin-top: 0.8rem; display: flex; justify-content: flex-end; }
-.query-row :deep(.el-input) { min-width: 81px; }
+.query-row {
+  margin-bottom: 0.7rem;
+}
+
+.pager {
+  margin-top: 0.8rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.query-row :deep(.el-input) {
+  min-width: 96px;
+}
 </style>

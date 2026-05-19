@@ -62,3 +62,20 @@ export interface ExportJobItem {
   fileName: string;
   createdAt: string;
 }
+
+export interface ReportTemplateItem {
+  id: string;
+  templateName: string;
+  templateCode: string;
+  sourceType: 'upload' | 'custom';
+  reportType: ExportJobItem['reportType'];
+  status: 'enabled' | 'disabled';
+  isDefault: boolean;
+  version: string;
+  fileName: string;
+  fileSize: string;
+  creator: string;
+  updatedAt: string;
+  description: string;
+  sectionConfig: string[];
+}

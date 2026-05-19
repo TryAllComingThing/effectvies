@@ -14,7 +14,7 @@ const baseRoutes: AppRouteRecordRaw[] = [
     name: 'Root',
     component: () => import('@/layouts/MainLayout.vue'),
     redirect: '/dashboard',
-    meta: { title: '根路由', requiresAuth: true },
+    meta: { title: '首页', requiresAuth: true },
     children: appRoutes,
   },
   {

@@ -1,5 +1,6 @@
 import type { Router } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { usePlatformStore } from '@/store/modules/platform';
 import { useUserStore } from '@/store/modules/user';
 
 export const setupRouterGuard = (router: Router) => {
@@ -22,5 +23,10 @@ export const setupRouterGuard = (router: Router) => {
     }
 
     return true;
+  });
+
+  router.afterEach((to) => {
+    const platformStore = usePlatformStore();
+    platformStore.setCurrentPageTitle(String(to.meta.title || ''));
   });
 };

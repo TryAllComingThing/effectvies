@@ -1,9 +1,27 @@
 import type { MockMethod } from 'vite-plugin-mock';
 
-const depts = Array.from({ length: 18 }, (_, i) => ({ id: `dept${i + 1}`, code: `D${String(i + 1).padStart(3, '0')}`, name: i < 6 ? `一级科室-${i + 1}` : `二级科室-${i + 1}`, parentName: i < 6 ? '-' : `一级科室-${(i % 6) + 1}`, status: i % 4 === 0 ? 'disabled' : 'enabled', sort: i + 1 }));
-const rules = Array.from({ length: 36 }, (_, i) => ({ id: `rule${i + 1}`, name: `规则-${i + 1}`, tag: ['服务', '护理', '安全'][i % 3], content: `规则内容示例-${i + 1}`, deptName: ['科室一', '科室二', '科室三'][i % 3], status: i % 5 === 0 ? 'disabled' : 'enabled', createdAt: '2026-05-17 20:00:00' }));
-const semantics = Array.from({ length: 32 }, (_, i) => ({ id: `sem${i + 1}`, code: `SEM${String(i + 1).padStart(3, '0')}`, name: `业务语义-${i + 1}`, keyword: `关键词${i + 1}`, deptName: ['科室一', '科室二', '科室三'][i % 3], status: i % 4 === 0 ? 'disabled' : 'enabled' }));
-const sqlTemplates = Array.from({ length: 26 }, (_, i) => ({ id: `sql${i + 1}`, code: `SQL${String(i + 1).padStart(3, '0')}`, name: `统计模板-${i + 1}`, sqlBrief: `统计语句简述-${i + 1}`, sqlContent: `SELECT id, score FROM performance LIMIT ${10 + (i % 20)}`, deptName: ['科室一', '科室二', '科室三'][i % 3], status: i % 4 === 0 ? 'disabled' : 'enabled' }));
+const DEPT_NAMES = ['科室一', '科室二', '科室三'] as const;
+const RULE_TAGS = ['流程', '质量', '合规'] as const;
+
+const depts = Array.from({ length: 18 }, (_, i) => ({
+  id: `dept${i + 1}`,
+  code: `D${String(i + 1).padStart(3, '0')}`,
+  name: DEPT_NAMES[i % DEPT_NAMES.length],
+  parentName: '-',
+  status: i % 4 === 0 ? 'disabled' : 'enabled',
+  sort: i + 1,
+}));
+const rules = Array.from({ length: 36 }, (_, i) => ({
+  id: `rule${i + 1}`,
+  name: `规则-${i + 1}`,
+  tag: RULE_TAGS[i % RULE_TAGS.length],
+  content: `规则内容示例-${i + 1}`,
+  deptName: DEPT_NAMES[i % DEPT_NAMES.length],
+  status: i % 5 === 0 ? 'disabled' : 'enabled',
+  createdAt: '2026-05-17 20:00:00',
+}));
+const semantics = Array.from({ length: 32 }, (_, i) => ({ id: `sem${i + 1}`, code: `SEM${String(i + 1).padStart(3, '0')}`, name: `业务语义-${i + 1}`, keyword: `关键词${i + 1}`, deptName: DEPT_NAMES[i % DEPT_NAMES.length], status: i % 4 === 0 ? 'disabled' : 'enabled' }));
+const sqlTemplates = Array.from({ length: 26 }, (_, i) => ({ id: `sql${i + 1}`, code: `SQL${String(i + 1).padStart(3, '0')}`, name: `统计模板-${i + 1}`, sqlBrief: `统计语句简述-${i + 1}`, sqlContent: `SELECT id, score FROM performance LIMIT ${10 + (i % 20)}`, deptName: DEPT_NAMES[i % DEPT_NAMES.length], status: i % 4 === 0 ? 'disabled' : 'enabled' }));
 const ok = (data: unknown) => ({ code: 0, message: 'success', traceId: `trace_${Date.now()}`, data });
 const fail = (code: number, message: string) => ({ code, message, traceId: `trace_${Date.now()}`, data: null });
 const paginate = <T>(list: T[], pageNum: number, pageSize: number) => ({ list: list.slice((pageNum - 1) * pageSize, (pageNum - 1) * pageSize + pageSize), total: list.length, pageNum, pageSize });

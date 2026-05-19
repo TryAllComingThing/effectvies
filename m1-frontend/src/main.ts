@@ -7,6 +7,7 @@ import router from './router';
 import { setupRouterGuard } from './router/guard';
 import { store } from './store';
 import { setupPermissionDirective } from './directives/permission';
+import { usePlatformStore } from './store/modules/platform';
 import '@/assets/styles/index.scss';
 
 const app = createApp(App);
@@ -16,5 +17,6 @@ app.use(router);
 app.use(ElementPlus, { locale: zhCn });
 setupPermissionDirective(app);
 setupRouterGuard(router);
+usePlatformStore(store).syncDocumentMeta();
 
 app.mount('#app');

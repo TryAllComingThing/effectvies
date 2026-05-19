@@ -21,7 +21,7 @@ export const appRoutes: AppRouteRecordRaw[] = [
     path: '/perf-files',
     name: 'PerfFiles',
     component: () => import('@/views/perf-file/PerfFileView.vue'),
-    meta: { title: '文件管理', icon: 'FileSpreadsheet', requiresAuth: true, roles: ['admin'] },
+    meta: { title: '绩效文件管理', icon: 'FileSpreadsheet', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/perf-files/log',
@@ -39,13 +39,13 @@ export const appRoutes: AppRouteRecordRaw[] = [
     path: '/perf-review',
     name: 'PerfReview',
     component: () => import('@/views/perf-review/PerfReviewView.vue'),
-    meta: { title: '绩效审核', icon: 'ClipboardCheck', requiresAuth: true, roles: ['admin'] },
+    meta: { title: '绩效审核管理', icon: 'ClipboardCheck', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/performance',
     name: 'Performance',
     component: () => import('@/views/performance/PerformanceView.vue'),
-    meta: { title: '绩效管理', icon: 'BarChart3', requiresAuth: true, roles: ['admin'] },
+    meta: { title: '绩效总览', icon: 'BarChart3', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/analysis/ask',
@@ -62,13 +62,19 @@ export const appRoutes: AppRouteRecordRaw[] = [
   {
     path: '/analysis/report',
     name: 'AnalysisReport',
-    component: () => import('@/views/reports/ReportView.vue'),
-    meta: { title: '绩效报告', icon: 'FileText', requiresAuth: true, roles: ['admin', 'user'] },
+    component: () => import('@/views/reports/PerfReportView.vue'),
+    meta: { title: '智能报告', icon: 'FileText', requiresAuth: true, roles: ['admin', 'user'] },
+  },
+  {
+    path: '/analysis/performance-report',
+    name: 'AnalysisPerformanceReport',
+    component: () => import('@/views/reports/PerformanceReportView.vue'),
+    meta: { title: '绩效报告', icon: 'FileStack', requiresAuth: true, roles: ['admin', 'user'] },
   },
   {
     path: '/analysis/template',
     name: 'AnalysisTemplate',
-    component: () => import('@/views/reports/ReportView.vue'),
+    component: () => import('@/views/reports/ReportTemplateView.vue'),
     meta: { title: '报告模板', icon: 'FileCog', requiresAuth: true, roles: ['admin', 'user'] },
   },
   {
@@ -112,5 +118,11 @@ export const appRoutes: AppRouteRecordRaw[] = [
     name: 'SystemLogs',
     component: () => import('@/views/system/SystemView.vue'),
     meta: { title: '日志管理', icon: 'ScrollText', requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/system/platform',
+    name: 'SystemPlatform',
+    component: () => import('@/views/system/PlatformConfigView.vue'),
+    meta: { title: '平台配置', icon: 'PanelsTopLeft', requiresAuth: true, roles: ['admin'] },
   },
 ];

@@ -33,7 +33,7 @@ const text = computed(() => {
     approved: '通过',
     rejected: '驳回',
     enabled: '启用',
-    disabled: '禁用',
+    disabled: '停用',
   };
   return map[props.status] || props.status;
 });
