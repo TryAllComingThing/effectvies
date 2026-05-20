@@ -154,6 +154,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import * as LucideIcons from 'lucide-vue-next';
 import { appRoutes } from '@/router/routes';
+import { useAuthStore } from '@/store/modules/auth';
 import { useUserStore } from '@/store/modules/user';
 import { usePlatformStore } from '@/store/modules/platform';
 
@@ -167,6 +168,7 @@ interface MenuGroup {
 const collapsed = ref(false);
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const userStore = useUserStore();
 const platformStore = usePlatformStore();
 
@@ -256,7 +258,7 @@ const handleBrandLogoError = () => {
 };
 
 const routeMap = computed(() => {
-  const allowed = appRoutes.filter((item) => !item.meta.roles || item.meta.roles.includes(userStore.roleCode));
+  const allowed = appRoutes.filter((item) => authStore.canAccessRoute(item, userStore.roleCode));
   return new Map(allowed.map((item) => [item.path, item.meta.title]));
 });
 
@@ -334,6 +336,7 @@ const logout = async () => {
       confirmButtonText: '确认退出',
       cancelButtonText: '取消',
     });
+    authStore.clearAuthorization();
     userStore.logout();
     router.replace('/login');
   } catch {

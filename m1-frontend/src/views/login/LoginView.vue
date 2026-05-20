@@ -56,10 +56,12 @@
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { useAuthStore } from '@/store/modules/auth';
 import { useUserStore } from '@/store/modules/user';
 import { usePlatformStore } from '@/store/modules/platform';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const userStore = useUserStore();
 const platformStore = usePlatformStore();
 const captchaValue = ref('');
@@ -129,6 +131,7 @@ const handleLogin = () => {
     roleCode: form.role,
   });
   ElMessage.success('登录成功');
+  authStore.setAuthorizationByRole(form.role);
   router.replace('/dashboard');
 };
 </script>

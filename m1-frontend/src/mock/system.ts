@@ -7,7 +7,7 @@ const users = Array.from({ length: 53 }, (_, i) => ({
   account: `user${i + 1}`,
   name: `用户${i + 1}`,
   deptName: ['科室一', '科室二', '科室三'][i % 3],
-  roleName: i % 5 === 0 ? '管理员' : '普通用户',
+  roleName: i % 5 === 0 ? '系统管理员' : '普通用户',
   phone: `1380000${String(1000 + i).slice(-4)}`,
   userStatus: i % 4 === 0 ? 'disabled' : 'enabled',
   createdAt: now,
@@ -42,48 +42,194 @@ const logs = Array.from({ length: 66 }, (_, i) => ({
 
 const ok = (data: unknown) => ({ code: 0, message: 'success', traceId: `trace_${Date.now()}`, data });
 const fail = (code: number, message: string) => ({ code, message, traceId: `trace_${Date.now()}`, data: null });
-const paginate = <T>(list: T[], pageNum: number, pageSize: number) => ({ list: list.slice((pageNum - 1) * pageSize, (pageNum - 1) * pageSize + pageSize), total: list.length, pageNum, pageSize });
+const paginate = <T>(list: T[], pageNum: number, pageSize: number) => ({
+  list: list.slice((pageNum - 1) * pageSize, (pageNum - 1) * pageSize + pageSize),
+  total: list.length,
+  pageNum,
+  pageSize,
+});
 
 export default [
   {
-    url: '/api/system/users', method: 'get', response: ({ query }: { query: Record<string, string> }) => {
-      const pageNum = Number(query.pageNum || 1), pageSize = Number(query.pageSize || 10);
+    url: '/api/system/users',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const pageNum = Number(query.pageNum || 1);
+      const pageSize = Number(query.pageSize || 10);
       const { account = '', name = '', deptName = '', roleName = '', userStatus = '' } = query;
-      const filtered = users.filter((u) => u.account.includes(account) && u.name.includes(name) && u.deptName.includes(deptName) && (!roleName || u.roleName === roleName) && (!userStatus || u.userStatus === userStatus));
+      const filtered = users.filter(
+        (u) =>
+          u.account.includes(account) &&
+          u.name.includes(name) &&
+          u.deptName.includes(deptName) &&
+          (!roleName || u.roleName === roleName) &&
+          (!userStatus || u.userStatus === userStatus)
+      );
       return ok(paginate(filtered, pageNum, pageSize));
     },
   },
-  { url: '/api/system/users/:id/toggle-status', method: 'post', response: ({ url }: { url: string }) => { const id = url.split('/api/system/users/')[1].split('/toggle-status')[0]; const user = users.find((u) => u.id === id); if (!user) return fail(40431, '用户不存在'); user.userStatus = user.userStatus === 'enabled' ? 'disabled' : 'enabled'; return ok(null); } },
   {
-    url: '/api/system/roles', method: 'get', response: ({ query }: { query: Record<string, string> }) => {
-      const pageNum = Number(query.pageNum || 1), pageSize = Number(query.pageSize || 10);
+    url: '/api/system/users',
+    method: 'post',
+    response: ({ body }: { body: Record<string, string> }) => {
+      const id = `u${Date.now()}`;
+      users.unshift({
+        id,
+        account: body.account || '',
+        name: body.name || '',
+        deptName: body.deptName || '',
+        roleName: body.roleName || '',
+        phone: body.phone || '',
+        userStatus: (body.userStatus as 'enabled' | 'disabled') || 'enabled',
+        createdAt: now,
+        lastLoginAt: now,
+      });
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/users/:id',
+    method: 'put',
+    response: ({ url, body }: { url: string; body: Record<string, string> }) => {
+      const id = url.split('/api/system/users/')[1];
+      const item = users.find((u) => u.id === id);
+      if (!item) return fail(40431, '用户不存在');
+      item.account = body.account || '';
+      item.name = body.name || '';
+      item.deptName = body.deptName || '';
+      item.roleName = body.roleName || '';
+      item.phone = body.phone || '';
+      item.userStatus = (body.userStatus as 'enabled' | 'disabled') || 'enabled';
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/users/:id/reset-password',
+    method: 'post',
+    response: ({ url }: { url: string }) => {
+      const id = url.split('/api/system/users/')[1].split('/reset-password')[0];
+      const user = users.find((u) => u.id === id);
+      if (!user) return fail(40431, '用户不存在');
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/users/:id',
+    method: 'delete',
+    response: ({ url }: { url: string }) => {
+      const id = url.split('/api/system/users/')[1];
+      const index = users.findIndex((u) => u.id === id);
+      if (index < 0) return fail(40431, '?????');
+      users.splice(index, 1);
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/users/:id/toggle-status',
+    method: 'post',
+    response: ({ url }: { url: string }) => {
+      const id = url.split('/api/system/users/')[1].split('/toggle-status')[0];
+      const user = users.find((u) => u.id === id);
+      if (!user) return fail(40431, '用户不存在');
+      user.userStatus = user.userStatus === 'enabled' ? 'disabled' : 'enabled';
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/roles',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const pageNum = Number(query.pageNum || 1);
+      const pageSize = Number(query.pageSize || 10);
       const { roleCode = '', roleName = '', deptName = '' } = query;
       const filtered = roles.filter((r) => r.roleCode.includes(roleCode) && r.roleName.includes(roleName) && r.deptName.includes(deptName));
       return ok(paginate(filtered, pageNum, pageSize));
     },
   },
-  { url: '/api/system/roles/:id', method: 'delete', response: ({ url }: { url: string }) => { const id = url.split('/api/system/roles/')[1]; const idx = roles.findIndex((r) => r.id === id); if (idx < 0) return fail(40432, '角色不存在'); if (roles[idx].userCount > 0) return fail(40932, '角色已绑定用户，不可删除'); roles.splice(idx, 1); return ok(null); } },
   {
-    url: '/api/system/dicts', method: 'get', response: ({ query }: { query: Record<string, string> }) => {
-      const pageNum = Number(query.pageNum || 1), pageSize = Number(query.pageSize || 10);
+    url: '/api/system/roles',
+    method: 'post',
+    response: ({ body }: { body: Record<string, string> }) => {
+      roles.unshift({
+        id: `r${Date.now()}`,
+        roleCode: body.roleCode || '',
+        roleName: body.roleName || '',
+        deptName: body.deptName || '',
+        userCount: 0,
+        createdAt: now,
+      });
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/roles/:id',
+    method: 'put',
+    response: ({ url, body }: { url: string; body: Record<string, string> }) => {
+      const id = url.split('/api/system/roles/')[1];
+      const item = roles.find((r) => r.id === id);
+      if (!item) return fail(40432, '角色不存在');
+      item.roleCode = body.roleCode || '';
+      item.roleName = body.roleName || '';
+      item.deptName = body.deptName || '';
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/roles/:id',
+    method: 'delete',
+    response: ({ url }: { url: string }) => {
+      const id = url.split('/api/system/roles/')[1];
+      const idx = roles.findIndex((r) => r.id === id);
+      if (idx < 0) return fail(40432, '角色不存在');
+      if (roles[idx].userCount > 0) return fail(40932, '角色已绑定用户，不可删除');
+      roles.splice(idx, 1);
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/dicts',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const pageNum = Number(query.pageNum || 1);
+      const pageSize = Number(query.pageSize || 10);
       const { dictType = '', dictLabel = '', status = '' } = query;
       const filtered = dicts.filter((d) => d.dictType.includes(dictType) && d.dictLabel.includes(dictLabel) && (!status || d.status === status));
       return ok(paginate(filtered, pageNum, pageSize));
     },
   },
-  { url: '/api/system/dicts/:id/toggle-status', method: 'post', response: ({ url }: { url: string }) => { const id = url.split('/api/system/dicts/')[1].split('/toggle-status')[0]; const dict = dicts.find((d) => d.id === id); if (!dict) return fail(40433, '字典项不存在'); dict.status = dict.status === 'enabled' ? 'disabled' : 'enabled'; return ok(null); } },
   {
-    url: '/api/system/dicts', method: 'post', response: ({ body }: { body: { dictType: string; dictLabel: string; dictValue: string; status: 'enabled' | 'disabled'; remark?: string } }) => {
-      if (!body?.dictType?.trim()) return fail(40034, '字典类型不能为空');
-      if (!body?.dictLabel?.trim()) return fail(40035, '字典标签不能为空');
-      if (!body?.dictValue?.trim()) return fail(40036, '字典键值不能为空');
-      const id = `d${Date.now()}`;
-      dicts.unshift({ id, dictType: body.dictType, dictLabel: body.dictLabel, dictValue: body.dictValue, status: body.status || 'enabled', remark: body.remark || '' });
+    url: '/api/system/dicts/:id/toggle-status',
+    method: 'post',
+    response: ({ url }: { url: string }) => {
+      const id = url.split('/api/system/dicts/')[1].split('/toggle-status')[0];
+      const dict = dicts.find((d) => d.id === id);
+      if (!dict) return fail(40433, '字典项不存在');
+      dict.status = dict.status === 'enabled' ? 'disabled' : 'enabled';
       return ok(null);
     },
   },
   {
-    url: '/api/system/dicts/:id', method: 'put', response: ({ url, body }: { url: string; body: { dictType: string; dictLabel: string; dictValue: string; status: 'enabled' | 'disabled'; remark?: string } }) => {
+    url: '/api/system/dicts',
+    method: 'post',
+    response: ({ body }: { body: { dictType: string; dictLabel: string; dictValue: string; status: 'enabled' | 'disabled'; remark?: string } }) => {
+      if (!body?.dictType?.trim()) return fail(40034, '字典类型不能为空');
+      if (!body?.dictLabel?.trim()) return fail(40035, '字典标签不能为空');
+      if (!body?.dictValue?.trim()) return fail(40036, '字典值不能为空');
+      dicts.unshift({
+        id: `d${Date.now()}`,
+        dictType: body.dictType,
+        dictLabel: body.dictLabel,
+        dictValue: body.dictValue,
+        status: body.status || 'enabled',
+        remark: body.remark || '',
+      });
+      return ok(null);
+    },
+  },
+  {
+    url: '/api/system/dicts/:id',
+    method: 'put',
+    response: ({ url, body }: { url: string; body: { dictType: string; dictLabel: string; dictValue: string; status: 'enabled' | 'disabled'; remark?: string } }) => {
       const id = url.split('/api/system/dicts/')[1];
       const item = dicts.find((d) => d.id === id);
       if (!item) return fail(40433, '字典项不存在');
@@ -96,7 +242,9 @@ export default [
     },
   },
   {
-    url: '/api/system/dicts/:id', method: 'delete', response: ({ url }: { url: string }) => {
+    url: '/api/system/dicts/:id',
+    method: 'delete',
+    response: ({ url }: { url: string }) => {
       const id = url.split('/api/system/dicts/')[1];
       const index = dicts.findIndex((d) => d.id === id);
       if (index < 0) return fail(40433, '字典项不存在');
@@ -105,12 +253,27 @@ export default [
     },
   },
   {
-    url: '/api/system/logs', method: 'get', response: ({ query }: { query: Record<string, string> }) => {
-      const pageNum = Number(query.pageNum || 1), pageSize = Number(query.pageSize || 10);
+    url: '/api/system/logs',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const pageNum = Number(query.pageNum || 1);
+      const pageSize = Number(query.pageSize || 10);
       const { logType = '', operator = '', module = '', deptName = '' } = query;
-      const filtered = logs.filter((l) => (!logType || l.logType === logType) && l.operator.includes(operator) && l.module.includes(module) && l.deptName.includes(deptName));
+      const filtered = logs.filter(
+        (l) => (!logType || l.logType === logType) && l.operator.includes(operator) && l.module.includes(module) && l.deptName.includes(deptName)
+      );
       return ok(paginate(filtered, pageNum, pageSize));
     },
   },
-  { url: '/api/system/logs/batch-delete', method: 'post', response: ({ body }: { body: { ids: string[] } }) => { (body?.ids || []).forEach((id) => { const idx = logs.findIndex((l) => l.id === id); if (idx >= 0) logs.splice(idx, 1); }); return ok(null); } },
+  {
+    url: '/api/system/logs/batch-delete',
+    method: 'post',
+    response: ({ body }: { body: { ids: string[] } }) => {
+      (body?.ids || []).forEach((id) => {
+        const idx = logs.findIndex((l) => l.id === id);
+        if (idx >= 0) logs.splice(idx, 1);
+      });
+      return ok(null);
+    },
+  },
 ] as MockMethod[];

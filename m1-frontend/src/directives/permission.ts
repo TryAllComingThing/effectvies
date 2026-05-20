@@ -1,12 +1,15 @@
 import type { App, Directive } from 'vue';
+import { useAuthStore } from '@/store/modules/auth';
 import { useUserStore } from '@/store/modules/user';
+import { canAccessByBinding, normalizePermissionBinding } from '@/utils/auth';
 
 const permissionDirective: Directive = {
   mounted(el, binding) {
-    const store = useUserStore();
-    const requiredRoles = binding.value as Array<'admin' | 'user'>;
+    const userStore = useUserStore();
+    const authStore = useAuthStore();
+    const normalizedBinding = normalizePermissionBinding(binding.value);
 
-    if (!requiredRoles?.includes(store.roleCode)) {
+    if (!canAccessByBinding(normalizedBinding, userStore.roleCode, authStore.permissions)) {
       el.parentNode?.removeChild(el);
     }
   },

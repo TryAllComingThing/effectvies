@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import router from '@/router';
 import { store } from '@/store';
+import { useAuthStore } from '@/store/modules/auth';
 import { useUserStore } from '@/store/modules/user';
 
 const request = axios.create({
@@ -25,8 +26,10 @@ request.interceptors.response.use(
 
     if (status === 401 || status === 403) {
       const userStore = useUserStore(store);
+      const authStore = useAuthStore(store);
       if (userStore.isLoggedIn) {
         userStore.logout();
+        authStore.clearAuthorization();
         ElMessage.error(status === 401 ? '登录已失效，请重新登录' : '当前账号无权限，请重新登录');
         if (router.currentRoute.value.path !== '/login') {
           router.replace('/login');

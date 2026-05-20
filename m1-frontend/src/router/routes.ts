@@ -5,7 +5,9 @@ export interface AppRouteMeta {
   icon?: string;
   requiresAuth?: boolean;
   roles?: Array<'admin' | 'user'>;
-  permission?: string;
+  permissions?: string[];
+  hidden?: boolean;
+  keepAlive?: boolean;
 }
 
 export type AppRouteRecordRaw = RouteRecordRaw & { meta: AppRouteMeta };
@@ -80,43 +82,43 @@ export const appRoutes: AppRouteRecordRaw[] = [
   {
     path: '/system/users',
     name: 'SystemUsers',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemUsersView.vue'),
     meta: { title: '用户管理', icon: 'Users', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/system/depts',
     name: 'SystemDepts',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemDeptsView.vue'),
     meta: { title: '科室管理', icon: 'Building2', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/system/roles',
     name: 'SystemRoles',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemRolesView.vue'),
     meta: { title: '角色管理', icon: 'ShieldCheck', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/system/rules',
     name: 'SystemRules',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemRulesView.vue'),
     meta: { title: '规则管理', icon: 'FileCode2', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/system/semantic',
     name: 'SystemSemantic',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemSemanticView.vue'),
     meta: { title: '语义管理', icon: 'BookOpenText', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/system/dicts',
     name: 'SystemDicts',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemDictsView.vue'),
     meta: { title: '字典管理', icon: 'Database', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/system/logs',
     name: 'SystemLogs',
-    component: () => import('@/views/system/SystemView.vue'),
+    component: () => import('@/views/system/SystemLogsView.vue'),
     meta: { title: '日志管理', icon: 'ScrollText', requiresAuth: true, roles: ['admin'] },
   },
   {
