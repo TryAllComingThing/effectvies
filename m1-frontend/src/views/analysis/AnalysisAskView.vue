@@ -129,18 +129,6 @@ const sessions = ref<Session[]>([
       },
     ],
   },
-  {
-    id: 's2',
-    title: '事件处置方案',
-    messages: [
-      {
-        id: 'm4',
-        role: 'assistant',
-        content: '请描述事件类型，我可以给出处置建议。',
-        reasoning: '先明确事件类型和影响范围，再匹配历史方案，最后生成分步处置建议。',
-      },
-    ],
-  },
 ]);
 const activeSessionId = ref('s1');
 const inputText = ref('');

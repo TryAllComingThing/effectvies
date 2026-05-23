@@ -2,9 +2,7 @@
   <div>
     <el-form inline :model="ruleQuery" class="query-row">
       <el-form-item label="规则名称"><el-input v-model="ruleQuery.name" clearable /></el-form-item>
-      <el-form-item label="标签"><el-input v-model="ruleQuery.tag" clearable /></el-form-item>
       <el-form-item label="规则内容"><el-input v-model="ruleQuery.content" clearable /></el-form-item>
-      <el-form-item label="科室"><el-input v-model="ruleQuery.deptName" clearable /></el-form-item>
       <el-form-item label="状态">
         <el-select v-model="ruleQuery.status" clearable style="width: 120px">
           <el-option label="启用" value="enabled" />
@@ -21,9 +19,7 @@
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="name" label="规则名称" min-width="130" />
-      <el-table-column prop="tag" label="标签" width="100" />
       <el-table-column prop="content" label="规则内容" min-width="160" />
-      <el-table-column prop="deptName" label="科室" width="100" />
       <el-table-column label="状态" width="100">
         <template #default="scope"><StatusTag :status="scope.row.status" /></template>
       </el-table-column>

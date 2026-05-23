@@ -2,11 +2,12 @@ import type { MockMethod } from 'vite-plugin-mock';
 import type { PerfFileItem, PerfTaskItem } from '@/types';
 
 const now = '2026-05-17 20:00:00';
+const reportDate = now.slice(0, 10);
 
 const buildFile = (i: number): PerfFileItem => ({
   id: `f${i}`,
   batchNo: `JXData-20260517-${String(i).padStart(8, '0')}`,
-  name: `绩效文件-${i}`,
+  name: `绩效-${reportDate}`,
   format: i % 3 === 0 ? 'zip' : i % 2 === 0 ? 'xls' : 'xlsx',
   parseStatus: ['unparsed', 'parsing', 'success', 'fail'][i % 4] as PerfFileItem['parseStatus'],
   uploadedAt: now,

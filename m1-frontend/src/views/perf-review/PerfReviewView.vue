@@ -3,7 +3,6 @@
     <template #actions>
       <el-space>
         <el-button type="primary" v-permission="['admin']" @click="openCreate"><ActionIcon name="Plus" />新增</el-button>
-        <el-button v-permission="['admin']" @click="openEditBySelection"><ActionIcon name="Pencil" />编辑</el-button>
         <el-button type="danger" plain :disabled="!selectedIds.length" v-permission="['admin']" @click="todo('删除')">
           <ActionIcon name="Trash2" />删除
         </el-button>
@@ -12,13 +11,13 @@
 
     <el-form inline :model="query" class="query-row">
       <el-form-item label="主题"><el-input v-model="query.title" clearable /></el-form-item>
-      <el-form-item label="路线"><el-input v-model="query.routeName" clearable /></el-form-item>
+      <el-form-item label="类型"><el-input v-model="query.routeName" clearable /></el-form-item>
       <el-form-item label="科室">
         <el-select v-model="query.deptName" clearable>
           <el-option v-for="d in DEPT_OPTIONS" :key="d" :label="d" :value="d" />
         </el-select>
       </el-form-item>
-      <el-form-item label="提出人"><el-input v-model="query.proposer" clearable /></el-form-item>
+      <el-form-item label="提报人"><el-input v-model="query.proposer" clearable /></el-form-item>
       <el-form-item>
         <el-button type="primary" @click="loadData"><ActionIcon name="Search" />查询</el-button>
         <el-button @click="resetQuery"><ActionIcon name="RotateCcw" />重置</el-button>
@@ -29,11 +28,12 @@
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="title" label="主题" min-width="160" />
-      <el-table-column prop="routeName" label="路线" min-width="110" />
+      <el-table-column prop="routeName" label="类型" min-width="110" />
       <el-table-column prop="deptName" label="科室" min-width="110" />
-      <el-table-column prop="proposer" label="提出人" min-width="100" />
-      <el-table-column prop="score" label="分数" width="80" />
+      <el-table-column prop="proposer" label="提报人" min-width="100" />
       <el-table-column prop="confidence" label="置信度" width="90" />
+      <el-table-column prop="eventAt" label="上报时间" min-width="160" />
+      <el-table-column prop="parsedAt" label="匹配时间" min-width="160" />
       <el-table-column label="审核状态" width="120">
         <template #default="scope"><StatusTag :status="scope.row.reviewStatus" /></template>
       </el-table-column>
@@ -45,9 +45,6 @@
             </el-button>
             <el-button text type="danger" size="small" v-permission="['admin']" @click="openReject(scope.row.id)">
               <ActionIcon name="XCircle" />驳回
-            </el-button>
-            <el-button text type="primary" size="small" v-permission="['admin']" @click="openEdit(scope.row)">
-              <ActionIcon name="Pencil" />编辑
             </el-button>
             <el-button text type="primary" size="small" @click="openDetail(scope.row)">
               <ActionIcon name="Eye" />详情
@@ -73,9 +70,9 @@
       <el-form :model="editForm" label-width="88px">
         <el-form-item label="主题"><el-input v-model="editForm.title" /></el-form-item>
         <el-form-item label="内容"><el-input v-model="editForm.content" type="textarea" :rows="3" /></el-form-item>
-        <el-form-item label="路线"><el-input v-model="editForm.routeName" /></el-form-item>
+        <el-form-item label="类型"><el-input v-model="editForm.routeName" /></el-form-item>
         <el-form-item label="科室"><el-input v-model="editForm.deptName" /></el-form-item>
-        <el-form-item label="提出人"><el-input v-model="editForm.proposer" /></el-form-item>
+        <el-form-item label="提报人"><el-input v-model="editForm.proposer" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="editVisible = false">取消</el-button>
@@ -99,7 +96,7 @@
           <el-descriptions-item label="任务号">{{ detailItem.sourceTaskNo }}</el-descriptions-item>
           <el-descriptions-item label="批号">{{ detailItem.sourceBatchNo }}</el-descriptions-item>
           <el-descriptions-item label="匹配时间">{{ detailItem.parsedAt }}</el-descriptions-item>
-          <el-descriptions-item label="提出人">{{ detailItem.proposer }}</el-descriptions-item>
+          <el-descriptions-item label="提报人">{{ detailItem.proposer }}</el-descriptions-item>
           <el-descriptions-item label="主题" :span="2">{{ detailItem.title }}</el-descriptions-item>
           <el-descriptions-item label="内容" :span="2">{{ detailItem.content }}</el-descriptions-item>
         </el-descriptions>
@@ -158,28 +155,6 @@ const openCreate = () => {
   editMode.value = 'create';
   Object.assign(editForm, { id: '', title: '', content: '', routeName: '', deptName: '', proposer: '' });
   editVisible.value = true;
-};
-
-const openEdit = (row: PerfReviewItem) => {
-  editMode.value = 'edit';
-  Object.assign(editForm, {
-    id: row.id,
-    title: row.title,
-    content: row.content,
-    routeName: row.routeName,
-    deptName: row.deptName,
-    proposer: row.proposer,
-  });
-  editVisible.value = true;
-};
-
-const openEditBySelection = () => {
-  const row = rows.value.find((i) => i.id === selectedIds.value[0]);
-  if (!row) {
-    ElMessage.warning('请先选择一条数据');
-    return;
-  }
-  openEdit(row);
 };
 
 const submitEdit = () => {

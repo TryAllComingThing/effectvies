@@ -3,7 +3,6 @@
     <el-form inline :model="roleQuery" class="query-row">
       <el-form-item label="角色编码"><el-input v-model="roleQuery.roleCode" clearable /></el-form-item>
       <el-form-item label="角色名称"><el-input v-model="roleQuery.roleName" clearable /></el-form-item>
-      <el-form-item label="科室"><el-input v-model="roleQuery.deptName" clearable /></el-form-item>
       <el-form-item>
         <el-button type="primary" @click="emit('search')">查询</el-button>
         <el-button @click="emit('reset')">重置</el-button>
@@ -15,7 +14,6 @@
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="roleCode" label="角色编码" min-width="120" />
       <el-table-column prop="roleName" label="角色名称" min-width="120" />
-      <el-table-column prop="deptName" label="科室" min-width="120" />
       <el-table-column prop="userCount" label="关联人数" width="100" />
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="scope">

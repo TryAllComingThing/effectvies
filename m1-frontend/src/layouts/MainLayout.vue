@@ -275,7 +275,7 @@ const menuGroups = computed<MenuGroup[]>(() => {
       title: '绩效任务',
       icon: 'FolderKanban',
       children: [
-        { path: '/perf-files', title: '绩效文件管理', icon: 'FileSpreadsheet' },
+        { path: '/perf-files', title: '文件管理', icon: 'FileSpreadsheet' },
         { path: '/perf-tasks', title: '任务管理', icon: 'ListChecks' },
       ],
     },
@@ -285,7 +285,7 @@ const menuGroups = computed<MenuGroup[]>(() => {
       icon: 'ClipboardList',
       children: [
         { path: '/perf-review', title: '绩效审核管理', icon: 'ClipboardCheck' },
-        { path: '/performance', title: '绩效总览', icon: 'BarChart3' },
+        { path: '/performance', title: '绩效数据台账', icon: 'BarChart3' },
       ],
     },
     {

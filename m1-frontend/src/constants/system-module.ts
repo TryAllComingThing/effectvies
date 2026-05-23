@@ -19,7 +19,7 @@ export const SYSTEM_FIELD_LABELS: Record<string, string> = {
   dictType: '字典类型',
   dictLabel: '字典标签',
   dictValue: '字典值',
-  keyword: '关键词',
+  keyword: '规则内容',
   sqlBrief: 'SQL 摘要',
   module: '模块',
   operator: '操作人',
@@ -78,6 +78,28 @@ export const SYSTEM_MODULE_EDIT_FIELDS: Record<string, EditField[]> = {
 };
 
 export const SYSTEM_DICT_DATA_MAP: Record<string, DictDataRow[]> = {
+  sys_status_typpe: [
+    {
+      id: 's1',
+      dictCode: '1',
+      dictLabel: '启用',
+      dictValue: 'enabled',
+      sort: 1,
+      status: 'enabled',
+      remark: '状态字典',
+      createdAt: '2026-01-18 10:58:21',
+    },
+    {
+      id: 's2',
+      dictCode: '2',
+      dictLabel: '停用',
+      dictValue: 'disabled',
+      sort: 2,
+      status: 'enabled',
+      remark: '状态字典',
+      createdAt: '2026-01-18 10:58:21',
+    },
+  ],
   route: [
     {
       id: 'r1',
@@ -162,7 +184,7 @@ export const getSystemSemanticEditFields = (semanticTab: 'biz' | 'sql'): EditFie
     ? [
         { key: 'code', label: '语义编码' },
         { key: 'name', label: '语义名称' },
-        { key: 'keyword', label: '关键词' },
+        { key: 'keyword', label: '规则内容' },
         { key: 'deptName', label: '科室' },
         { key: 'status', label: '状态', type: 'select', options: [...SYSTEM_BASE_STATUS_OPTIONS] },
       ]

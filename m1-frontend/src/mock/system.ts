@@ -2,17 +2,51 @@ import type { MockMethod } from 'vite-plugin-mock';
 
 const now = '2026-05-17 20:00:00';
 
-const users = Array.from({ length: 53 }, (_, i) => ({
-  id: `u${i + 1}`,
-  account: `user${i + 1}`,
-  name: `用户${i + 1}`,
-  deptName: ['科室一', '科室二', '科室三'][i % 3],
-  roleName: i % 5 === 0 ? '系统管理员' : '普通用户',
-  phone: `1380000${String(1000 + i).slice(-4)}`,
-  userStatus: i % 4 === 0 ? 'disabled' : 'enabled',
-  createdAt: now,
-  lastLoginAt: now,
-}));
+type MockUser = {
+  id: string;
+  account: string;
+  name: string;
+  deptName: string;
+  roleName: string;
+  phone: string;
+  userStatus: 'enabled' | 'disabled';
+  createdAt: string;
+  lastLoginAt: string;
+};
+
+type MockDict = {
+  id: string;
+  dictType: string;
+  dictLabel: string;
+  dictValue: string;
+  status: 'enabled' | 'disabled';
+  remark: string;
+};
+
+const users: MockUser[] = [
+  {
+    id: 'u1',
+    account: 'zhangsan',
+    name: '张三',
+    deptName: '科室一',
+    roleName: '普通用户',
+    phone: '13800001001',
+    userStatus: 'enabled',
+    createdAt: now,
+    lastLoginAt: now,
+  },
+  {
+    id: 'u2',
+    account: 'admin',
+    name: '管理员',
+    deptName: '科室一',
+    roleName: '系统管理员',
+    phone: '13800001002',
+    userStatus: 'enabled',
+    createdAt: now,
+    lastLoginAt: now,
+  },
+];
 
 const roles = [
   { id: 'r1', roleCode: 'admin', roleName: '管理员', deptName: '科室一', userCount: 3, createdAt: now },
@@ -20,14 +54,16 @@ const roles = [
   { id: 'r3', roleCode: 'guest', roleName: '访客', deptName: '科室一', userCount: 0, createdAt: now },
 ];
 
-const dicts = Array.from({ length: 30 }, (_, i) => ({
-  id: `d${i + 1}`,
-  dictType: i % 2 === 0 ? 'route' : 'type',
-  dictLabel: `字典项${i + 1}`,
-  dictValue: `value_${i + 1}`,
-  status: i % 4 === 0 ? 'disabled' : 'enabled',
-  remark: '',
-}));
+const dicts: MockDict[] = [
+  {
+    id: 'd1',
+    dictType: 'sys_status_typpe',
+    dictLabel: '状态',
+    dictValue: '',
+    status: 'enabled',
+    remark: '',
+  },
+];
 
 const logs = Array.from({ length: 66 }, (_, i) => ({
   id: `l${i + 1}`,
@@ -119,7 +155,7 @@ export default [
     response: ({ url }: { url: string }) => {
       const id = url.split('/api/system/users/')[1];
       const index = users.findIndex((u) => u.id === id);
-      if (index < 0) return fail(40431, '?????');
+      if (index < 0) return fail(40431, '用户不存在');
       users.splice(index, 1);
       return ok(null);
     },

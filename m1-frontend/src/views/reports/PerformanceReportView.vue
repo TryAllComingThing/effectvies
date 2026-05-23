@@ -33,7 +33,7 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="季度报告" name="quarterly">
+        <el-tab-pane label="季报" name="quarterly">
           <div class="filter-bar">
             <div class="filter-row">
               <el-select v-model="quarterlyForm.year" class="w-140">

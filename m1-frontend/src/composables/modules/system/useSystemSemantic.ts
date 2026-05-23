@@ -65,7 +65,7 @@ export const useSystemSemantic = () => {
   const toggleSemantic = async (id: string) => {
     const response = await toggleSemanticStatus(id);
     if (response.code === 0) {
-      ElMessage.success('璇箟鐘舵€佸凡鏇存柊');
+      ElMessage.success('语义状态已更新');
       loadSemantics();
     }
   };

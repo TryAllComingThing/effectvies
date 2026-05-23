@@ -20,7 +20,6 @@
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="dictType" label="字典类型" min-width="180" />
       <el-table-column prop="dictLabel" label="字典名称" min-width="220" />
-      <el-table-column prop="dictValue" label="字典值" min-width="180" />
       <el-table-column label="状态" width="100">
         <template #default="scope"><StatusTag :status="scope.row.status" /></template>
       </el-table-column>

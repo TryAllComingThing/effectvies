@@ -16,15 +16,15 @@
           <el-option v-for="item in DEPT_OPTIONS" :key="item" :label="item" :value="item" />
         </el-select>
       </el-form-item>
-      <el-form-item label="线路">
+      <el-form-item label="类型">
         <el-select v-model="query.routeName" class="w-140" clearable>
           <el-option v-for="item in routeOptions" :key="item" :label="item" :value="item" />
         </el-select>
       </el-form-item>
-      <el-form-item label="分值区间">
-        <el-select v-model="query.scoreLevel" class="w-170">
+      <el-form-item label="置信度">
+        <el-select v-model="query.confidenceLevel" class="w-170">
           <el-option
-            v-for="item in REPORT_SCORE_LEVEL_OPTIONS"
+            v-for="item in confidenceLevelOptions"
             :key="item.value"
             :label="item.label"
             :value="item.value"
@@ -60,14 +60,10 @@
             <td>{{ row.routeName }}</td>
             <td>{{ row.count }}</td>
             <td>{{ row.proposerCount }}</td>
-            <td>{{ row.totalScore }}</td>
-            <td>{{ row.avgScore }}</td>
-            <td>{{ row.maxScore }}</td>
-            <td>{{ row.minScore }}</td>
-            <td>{{ row.excellentCount }}</td>
+            <td>{{ row.ratio }}</td>
           </tr>
           <tr v-if="!reportRows.length">
-            <td colspan="10" class="empty-cell">暂无符合条件的统计数据</td>
+            <td colspan="6" class="empty-cell">暂无符合条件的统计数据</td>
           </tr>
         </tbody>
         <tfoot v-if="reportRows.length">
@@ -75,11 +71,7 @@
             <td colspan="3">小计</td>
             <td>{{ summary.totalCount }}</td>
             <td>{{ summary.totalProposerCount }}</td>
-            <td>{{ summary.totalScore }}</td>
-            <td>{{ summary.avgScore }}</td>
-            <td>{{ summary.maxScore }}</td>
-            <td>{{ summary.minScore }}</td>
-            <td>{{ summary.excellentCount }}</td>
+            <td>{{ summary.totalRatio }}</td>
           </tr>
         </tfoot>
       </table>
@@ -97,13 +89,12 @@ import { DEPT_OPTIONS } from '@/utils/dept-options';
 import {
   EXPORT_REPORT_TYPE_OPTIONS,
   REPORT_DOWNLOAD_FILE_PREFIX,
-  REPORT_SCORE_LEVEL_OPTIONS,
   REPORT_SOURCE_TEXT,
   REPORT_TABLE_HEADERS,
 } from '@/utils/constant';
 import type { ExportJobItem, PerformanceItem } from '@/types';
 
-type ScoreLevel = '' | 'excellent' | 'good' | 'pass' | 'low';
+type ConfidenceLevel = '' | 'high' | 'medium' | 'low';
 
 type ReportRow = {
   key: string;
@@ -112,11 +103,7 @@ type ReportRow = {
   routeName: string;
   count: number;
   proposerCount: number;
-  totalScore: number;
-  avgScore: string;
-  maxScore: number;
-  minScore: number;
-  excellentCount: number;
+  ratio: string;
 };
 
 const route = useRoute();
@@ -126,9 +113,15 @@ const query = reactive({
   reportType: 'current' as ExportJobItem['reportType'],
   deptName: '',
   routeName: '',
-  scoreLevel: '' as ScoreLevel,
+  confidenceLevel: '' as ConfidenceLevel,
   keyword: '',
 });
+const confidenceLevelOptions = [
+  { label: '全部置信度', value: '' },
+  { label: '高（>=0.90）', value: 'high' },
+  { label: '中（0.80-0.89）', value: 'medium' },
+  { label: '低（<0.80）', value: 'low' },
+] as const;
 
 const pageTitle = computed(() => String(route.meta.title || '绩效报表'));
 
@@ -144,10 +137,9 @@ const filteredRows = computed(() => {
     if (query.routeName && item.routeName !== query.routeName) return false;
     if (keyword && !`${item.title}${item.proposer}${item.content}`.includes(keyword)) return false;
 
-    if (query.scoreLevel === 'excellent') return item.score >= 90;
-    if (query.scoreLevel === 'good') return item.score >= 80 && item.score < 90;
-    if (query.scoreLevel === 'pass') return item.score >= 60 && item.score < 80;
-    if (query.scoreLevel === 'low') return item.score < 60;
+    if (query.confidenceLevel === 'high') return item.confidence >= 0.9;
+    if (query.confidenceLevel === 'medium') return item.confidence >= 0.8 && item.confidence < 0.9;
+    if (query.confidenceLevel === 'low') return item.confidence < 0.8;
 
     return true;
   });
@@ -164,8 +156,6 @@ const reportRows = computed<ReportRow[]>(() => {
   });
 
   return Array.from(grouped.entries()).map(([key, list], index) => {
-    const scores = list.map((item) => item.score);
-    const totalScore = scores.reduce((sum, value) => sum + value, 0);
     const proposerCount = new Set(list.map((item) => item.proposer)).size;
 
     return {
@@ -175,27 +165,16 @@ const reportRows = computed<ReportRow[]>(() => {
       routeName: list[0]?.routeName || '-',
       count: list.length,
       proposerCount,
-      totalScore,
-      avgScore: list.length ? (totalScore / list.length).toFixed(2) : '0.00',
-      maxScore: scores.length ? Math.max(...scores) : 0,
-      minScore: scores.length ? Math.min(...scores) : 0,
-      excellentCount: list.filter((item) => item.score >= 90).length,
+      ratio: filteredRows.value.length ? `${((list.length / filteredRows.value.length) * 100).toFixed(2)}%` : '0.00%',
     };
   });
 });
 
 const summary = computed(() => {
-  const allScores = filteredRows.value.map((item) => item.score);
-  const totalScore = allScores.reduce((sum, value) => sum + value, 0);
-
   return {
     totalCount: filteredRows.value.length,
     totalProposerCount: new Set(filteredRows.value.map((item) => item.proposer)).size,
-    totalScore,
-    avgScore: filteredRows.value.length ? (totalScore / filteredRows.value.length).toFixed(2) : '0.00',
-    maxScore: allScores.length ? Math.max(...allScores) : 0,
-    minScore: allScores.length ? Math.min(...allScores) : 0,
-    excellentCount: filteredRows.value.filter((item) => item.score >= 90).length,
+    totalRatio: '100.00%',
   };
 });
 
@@ -214,7 +193,7 @@ const resetQuery = () => {
     reportType: 'current',
     deptName: '',
     routeName: '',
-    scoreLevel: '',
+    confidenceLevel: '',
     keyword: '',
   });
 };
@@ -234,11 +213,7 @@ const downloadTable = () => {
         row.routeName,
         row.count,
         row.proposerCount,
-        row.totalScore,
-        row.avgScore,
-        row.maxScore,
-        row.minScore,
-        row.excellentCount,
+        row.ratio,
       ].join(',')
     ),
     [
@@ -247,11 +222,7 @@ const downloadTable = () => {
       '',
       summary.value.totalCount,
       summary.value.totalProposerCount,
-      summary.value.totalScore,
-      summary.value.avgScore,
-      summary.value.maxScore,
-      summary.value.minScore,
-      summary.value.excellentCount,
+      summary.value.totalRatio,
     ].join(','),
   ];
 

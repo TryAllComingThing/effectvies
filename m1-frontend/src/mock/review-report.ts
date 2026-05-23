@@ -2,12 +2,36 @@ import type { MockMethod } from 'vite-plugin-mock';
 import type { ExportJobItem, PerformanceItem, PerfReviewItem } from '@/types';
 
 const now = '2026-05-17 20:00:00';
+const MILITARY_EVENTS = [
+  '边境联合巡逻保障',
+  '防空预警演练复盘',
+  '海上编队训练协同',
+  '战备物资调配校验',
+  '应急通信链路测试',
+  '夜间机动部署评估',
+  '无人机侦察任务复核',
+  '反恐处突联动演训',
+  '战场救护流程演练',
+  '后勤补给线路压测',
+];
+const MILITARY_TYPES = [
+  '边境防卫',
+  '防空作战',
+  '海上训练',
+  '后勤保障',
+  '通信保障',
+  '机动部署',
+  '侦察监视',
+  '反恐处突',
+  '卫勤保障',
+  '补给保障',
+];
 
 const reviewDb: PerfReviewItem[] = Array.from({ length: 54 }, (_, idx) => ({
   id: `r${idx + 1}`,
-  title: `绩效主题-${idx + 1}`,
+  title: MILITARY_EVENTS[idx % MILITARY_EVENTS.length],
   content: `绩效内容描述-${idx + 1}`,
-  routeName: ['一号线', '二号线', '三号线'][idx % 3],
+  routeName: MILITARY_TYPES[idx % MILITARY_TYPES.length],
   deptName: ['科室一', '科室二', '科室三'][idx % 3],
   proposer: ['张三', '李四', '王五'][idx % 3],
   score: 60 + (idx % 40),
@@ -22,9 +46,9 @@ const reviewDb: PerfReviewItem[] = Array.from({ length: 54 }, (_, idx) => ({
 
 const performanceDb: PerformanceItem[] = Array.from({ length: 36 }, (_, idx) => ({
   id: `p${idx + 1}`,
-  title: `绩效主题-${idx + 1}`,
+  title: MILITARY_EVENTS[idx % MILITARY_EVENTS.length],
   content: `绩效内容描述-${idx + 1}`,
-  routeName: ['一号线', '二号线', '三号线'][idx % 3],
+  routeName: MILITARY_TYPES[idx % MILITARY_TYPES.length],
   deptName: ['科室一', '科室二', '科室三'][idx % 3],
   proposer: ['张三', '李四', '王五'][idx % 3],
   score: 65 + (idx % 30),

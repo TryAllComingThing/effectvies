@@ -1,12 +1,9 @@
 <template>
-  <PageContainer title="绩效总览">
+  <PageContainer title="绩效数据台账">
     <template #actions>
       <el-space>
         <el-button type="primary" v-permission="['admin']" @click="openCreate">
           <ActionIcon name="Plus" />新增
-        </el-button>
-        <el-button v-permission="['admin']" @click="openEditBySelection">
-          <ActionIcon name="Pencil" />编辑
         </el-button>
         <el-button
           type="danger"
@@ -24,8 +21,8 @@
       <el-form-item label="主题">
         <el-input v-model="query.title" clearable placeholder="请输入主题" />
       </el-form-item>
-      <el-form-item label="线路">
-        <el-input v-model="query.routeName" clearable placeholder="请输入线路" />
+      <el-form-item label="类型">
+        <el-input v-model="query.routeName" clearable placeholder="请输入类型" />
       </el-form-item>
       <el-form-item label="科室">
         <el-select v-model="query.deptName" clearable placeholder="全部科室">
@@ -45,18 +42,15 @@
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="title" label="主题" min-width="180" />
-      <el-table-column prop="routeName" label="线路" min-width="120" />
+      <el-table-column prop="routeName" label="类型" min-width="120" />
       <el-table-column prop="deptName" label="科室" min-width="120" />
       <el-table-column prop="proposer" label="提报人" min-width="110" />
-      <el-table-column prop="score" label="分数" width="90" />
       <el-table-column prop="confidence" label="置信度" width="100" />
+      <el-table-column prop="eventAt" label="上报时间" min-width="170" />
       <el-table-column prop="matchedAt" label="匹配时间" min-width="170" />
       <el-table-column label="操作" min-width="220" fixed="right">
         <template #default="scope">
           <el-space>
-            <el-button text type="primary" size="small" v-permission="['admin']" @click="openEdit(scope.row)">
-              <ActionIcon name="Pencil" />编辑
-            </el-button>
             <el-button text type="primary" size="small" @click="openDetail(scope.row)">
               <ActionIcon name="Eye" />详情
             </el-button>
@@ -81,7 +75,7 @@
       <el-form :model="editForm" label-width="88px">
         <el-form-item label="主题"><el-input v-model="editForm.title" /></el-form-item>
         <el-form-item label="内容"><el-input v-model="editForm.content" type="textarea" :rows="3" /></el-form-item>
-        <el-form-item label="线路"><el-input v-model="editForm.routeName" /></el-form-item>
+        <el-form-item label="类型"><el-input v-model="editForm.routeName" /></el-form-item>
         <el-form-item label="科室"><el-input v-model="editForm.deptName" /></el-form-item>
         <el-form-item label="提报人"><el-input v-model="editForm.proposer" /></el-form-item>
       </el-form>
@@ -152,28 +146,6 @@ const openCreate = () => {
   editMode.value = 'create';
   Object.assign(editForm, { id: '', title: '', content: '', routeName: '', deptName: '', proposer: '' });
   editVisible.value = true;
-};
-
-const openEdit = (row: PerformanceItem) => {
-  editMode.value = 'edit';
-  Object.assign(editForm, {
-    id: row.id,
-    title: row.title,
-    content: row.content,
-    routeName: row.routeName,
-    deptName: row.deptName,
-    proposer: row.proposer,
-  });
-  editVisible.value = true;
-};
-
-const openEditBySelection = () => {
-  const row = rows.value.find((item) => item.id === selectedIds.value[0]);
-  if (!row) {
-    ElMessage.warning('请先选择一条数据');
-    return;
-  }
-  openEdit(row);
 };
 
 const submitEdit = () => {

@@ -4,14 +4,12 @@
       <el-space>
         <el-button type="primary" v-permission="['admin']" @click="openCreate"><ActionIcon name="Plus" />新增</el-button>
         <el-button type="danger" plain :disabled="!selectedIds.length" v-permission="['admin']" @click="todo('删除')">
-          <ActionIcon name="Trash2" />批量删除
+          <ActionIcon name="Trash2" />删除
         </el-button>
       </el-space>
     </template>
 
     <el-form inline :model="query" class="query-row">
-      <el-form-item label="任务号"><el-input v-model="query.taskNo" clearable /></el-form-item>
-      <el-form-item label="批号"><el-input v-model="query.batchNo" clearable /></el-form-item>
       <el-form-item label="文件名"><el-input v-model="query.fileName" clearable /></el-form-item>
       <el-form-item label="任务状态">
         <el-select v-model="query.taskStatus" clearable style="width: 120px">
@@ -32,15 +30,9 @@
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="taskNo" label="任务号" min-width="180" />
-      <el-table-column prop="batchNo" label="批号" min-width="180" />
       <el-table-column prop="fileName" label="文件名称" min-width="120" />
       <el-table-column label="状态" width="120">
         <template #default="scope"><StatusTag :status="scope.row.taskStatus" /></template>
-      </el-table-column>
-      <el-table-column label="进度" min-width="170">
-        <template #default="scope">
-          <el-progress :percentage="scope.row.progress" :status="scope.row.taskStatus === 'fail' ? 'exception' : undefined" />
-        </template>
       </el-table-column>
       <el-table-column prop="createdAt" label="创建时间" min-width="160" />
       <el-table-column label="操作" min-width="380" fixed="right">
@@ -53,7 +45,10 @@
               <ActionIcon name="Pencil" />编辑
             </el-button>
             <el-button text size="small" v-permission="['admin']" @click="openLogDialog(scope.row)">
-              <ActionIcon name="FileText" />运行日志
+              <ActionIcon name="FileText" />日志
+            </el-button>
+            <el-button text type="danger" size="small" v-permission="['admin']" @click="todo('删除')">
+              <ActionIcon name="Trash2" />删除
             </el-button>
             <el-button text type="danger" size="small" v-permission="['admin']" @click="runAction('clear', scope.row.id)">
               <ActionIcon name="Eraser" />清除
@@ -97,11 +92,11 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="logVisible" title="智能匹配日志" width="980px">
+    <el-dialog v-model="logVisible" title="绩效匹配日志" width="980px">
       <el-row :gutter="12" class="summary-row">
         <el-col :span="6"><el-card><div class="k">任务号</div><div class="v">{{ logSummary.taskNo }}</div></el-card></el-col>
-        <el-col :span="6"><el-card><div class="k">批号</div><div class="v">{{ logSummary.batchNo }}</div></el-card></el-col>
-        <el-col :span="6"><el-card><div class="k">已匹配条数</div><div class="v">{{ logSummary.matchedCount }}</div></el-card></el-col>
+        <el-col :span="6"><el-card><div class="k">文件名称</div><div class="v">{{ logSummary.fileName }}</div></el-card></el-col>
+        <el-col :span="6"><el-card><div class="k">匹配成功条数</div><div class="v">{{ logSummary.matchedCount }}</div></el-card></el-col>
         <el-col :span="6"><el-card><div class="k">总条数</div><div class="v">{{ logSummary.totalCount }}</div></el-card></el-col>
       </el-row>
       <el-card class="progress-card">
@@ -110,11 +105,10 @@
       </el-card>
       <el-table :data="logRows" size="small">
         <el-table-column type="index" width="56" label="#" />
-        <el-table-column prop="perfNo" label="绩效编号" min-width="160" />
-        <el-table-column prop="name" label="绩效名称" min-width="160" />
-        <el-table-column prop="deptName" label="科室" min-width="120" />
-        <el-table-column prop="score" label="分数" width="90" />
+        <el-table-column prop="sourcePerf" label="源绩效" min-width="200" />
+        <el-table-column prop="targetPerf" label="绩效" min-width="200" />
         <el-table-column prop="matchResult" label="匹配结果" min-width="140" />
+        <el-table-column prop="confidence" label="置信度" width="100" />
         <el-table-column prop="matchedAt" label="匹配时间" min-width="170" />
       </el-table>
       <template #footer><el-button @click="logVisible = false">关闭</el-button></template>
@@ -135,15 +129,22 @@ const loading = ref(false);
 const rows = ref<PerfTaskItem[]>([]);
 const total = ref(0);
 const selectedIds = ref<string[]>([]);
-const query = reactive({ pageNum: 1, pageSize: 10, taskNo: '', batchNo: '', fileName: '', taskStatus: '' });
+const query = reactive({ pageNum: 1, pageSize: 10, fileName: '', taskStatus: '' });
 
 const dialogVisible = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
 const form = reactive({ id: '', batchNo: '', fileName: '', taskStatus: 'pending' });
 const batchNoOptions = ref<PerfFileItem[]>([]);
 const logVisible = ref(false);
-const logSummary = reactive({ taskNo: '-', batchNo: '-', matchedCount: 0, totalCount: 0, progress: 0, status: 'pending' as PerfTaskItem['taskStatus'] });
-const logRows = ref<Array<{ perfNo: string; name: string; deptName: string; score: number; matchResult: string; matchedAt: string }>>([]);
+const logSummary = reactive({
+  taskNo: '-',
+  fileName: '-',
+  matchedCount: 0,
+  totalCount: 0,
+  progress: 0,
+  status: 'pending' as PerfTaskItem['taskStatus'],
+});
+const logRows = ref<Array<{ sourcePerf: string; targetPerf: string; matchResult: string; confidence: string; matchedAt: string }>>([]);
 
 const loadData = async () => {
   loading.value = true;
@@ -166,7 +167,7 @@ const onSelectionChange = (s: PerfTaskItem[]) => {
 };
 
 const resetQuery = () => {
-  Object.assign(query, { pageNum: 1, pageSize: 10, taskNo: '', batchNo: '', fileName: '', taskStatus: '' });
+  Object.assign(query, { pageNum: 1, pageSize: 10, fileName: '', taskStatus: '' });
   loadData();
 };
 
@@ -220,21 +221,27 @@ const openLogDialog = (row: PerfTaskItem) => {
   const matchedCount = Math.max(0, Math.round((row.progress / 100) * totalCount));
   Object.assign(logSummary, {
     taskNo: row.taskNo,
-    batchNo: row.batchNo,
+    fileName: row.fileName,
     matchedCount,
     totalCount,
     progress: row.progress,
     status: row.taskStatus,
   });
 
-  logRows.value = Array.from({ length: matchedCount || 1 }, (_, i) => ({
-    perfNo: `PF-${row.taskNo}-${String(i + 1).padStart(3, '0')}`,
-    name: `绩效项 ${i + 1}`,
-    deptName: ['科室一', '科室二', '科室三'][i % 3],
-    score: 70 + (i % 30),
-    matchResult: i % 7 === 0 ? '待人工复核' : '智能匹配成功',
-    matchedAt: '2026-05-18 10:30:00',
-  }));
+  const sourceEvents = ['边境联合巡逻保障', '防空预警演练复盘', '海上编队训练协同', '战备物资调配校验', '应急通信链路测试'];
+  const targetEvents = ['边境巡逻保障', '防空演练复盘', '编队海训协同', '战备物资校验', '通信链路测试'];
+
+  logRows.value = Array.from({ length: totalCount }, (_, i) => {
+    const confidence = Number((0.72 + (i % 20) * 0.01).toFixed(2));
+    const matched = i < matchedCount;
+    return {
+      sourcePerf: sourceEvents[i % sourceEvents.length],
+      targetPerf: targetEvents[i % targetEvents.length],
+      matchResult: matched ? (confidence >= 0.9 ? '匹配成功' : '部分匹配') : '未匹配',
+      confidence: matched ? confidence.toFixed(2) : '0.00',
+      matchedAt: matched ? '2026-05-18 10:30:00' : '-',
+    };
+  });
   logVisible.value = true;
 };
 

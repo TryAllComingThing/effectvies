@@ -282,7 +282,7 @@ const submitEdit = async () => {
       await updateUser(editForm.id, payload);
     }
 
-    ElMessage.success(editMode.value === 'create' ? '????' : '????');
+    ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
     editVisible.value = false;
     loadUsers();
     return;
@@ -301,7 +301,7 @@ const submitEdit = async () => {
       await updateRole(editForm.id, payload);
     }
 
-    ElMessage.success(editMode.value === 'create' ? '????' : '????');
+    ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
     editVisible.value = false;
     loadRoles();
     return;
@@ -322,7 +322,7 @@ const submitEdit = async () => {
       await updateDept(editForm.id, payload);
     }
 
-    ElMessage.success(editMode.value === 'create' ? '????' : '????');
+    ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
     editVisible.value = false;
     loadDepts();
     return;
@@ -343,7 +343,7 @@ const submitEdit = async () => {
       await updateRule(editForm.id, payload);
     }
 
-    ElMessage.success(editMode.value === 'create' ? '????' : '????');
+    ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
     editVisible.value = false;
     loadRules();
     return;
@@ -365,7 +365,7 @@ const submitEdit = async () => {
         await updateSemantic(editForm.id, payload);
       }
 
-      ElMessage.success(editMode.value === 'create' ? '????' : '????');
+      ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
       editVisible.value = false;
       loadSemantics();
       return;
@@ -386,7 +386,7 @@ const submitEdit = async () => {
       await updateSqlTemplate(editForm.id, payload);
     }
 
-    ElMessage.success(editMode.value === 'create' ? '????' : '????');
+    ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
     editVisible.value = false;
     loadSqlTemplates();
     return;
@@ -407,12 +407,12 @@ const submitEdit = async () => {
       await saveDict(payload, editForm.id);
     }
 
-    ElMessage.success(editMode.value === 'create' ? '????' : '????');
+    ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
     editVisible.value = false;
     return;
   }
 
-  ElMessage.success(editMode.value === 'create' ? '????' : '????');
+  ElMessage.success(editMode.value === 'create' ? '新增成功' : '编辑成功');
   editVisible.value = false;
 };
 
@@ -432,21 +432,21 @@ const runDelete = async () => {
 
   if (activeModule.value === 'users' && editForm.id) {
     await deleteUser(editForm.id);
-    ElMessage.success('????');
+    ElMessage.success('删除成功');
     loadUsers();
     return;
   }
 
   if (activeModule.value === 'depts' && editForm.id) {
     await deleteDept(editForm.id);
-    ElMessage.success('????');
+    ElMessage.success('删除成功');
     loadDepts();
     return;
   }
 
   if (activeModule.value === 'rules' && editForm.id) {
     await deleteRule(editForm.id);
-    ElMessage.success('????');
+    ElMessage.success('删除成功');
     loadRules();
     return;
   }
@@ -454,13 +454,13 @@ const runDelete = async () => {
   if (activeModule.value === 'semantic' && editForm.id) {
     if (semanticTab.value === 'biz') {
       await deleteSemantic(editForm.id);
-      ElMessage.success('????');
+      ElMessage.success('删除成功');
       loadSemantics();
       return;
     }
 
     await deleteSqlTemplate(editForm.id);
-    ElMessage.success('????');
+    ElMessage.success('删除成功');
     loadSqlTemplates();
     return;
   }
@@ -475,18 +475,18 @@ const runDelete = async () => {
     return;
   }
 
-  ElMessage.success('????');
+  ElMessage.success('删除成功');
 };
 
 const confirmResetPassword = async (row: Record<string, unknown>) => {
   try {
-    await ElMessageBox.confirm(`???? ${String(row.name || row.account || '???')} ?????`, '??????', {
+    await ElMessageBox.confirm(`确认重置 ${String(row.name || row.account || '用户')} 的密码吗？`, '重置确认', {
       type: 'warning',
-      confirmButtonText: '??',
-      cancelButtonText: '??',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
     });
     await resetUserPassword(String(row.id || ''));
-    ElMessage.success('??????');
+    ElMessage.success('密码重置成功');
   } catch {
     // cancel
   }

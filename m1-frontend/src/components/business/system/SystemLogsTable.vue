@@ -14,6 +14,7 @@
       <el-form-item>
         <el-button type="primary" @click="emit('search')">查询</el-button>
         <el-button @click="emit('reset')">重置</el-button>
+        <el-button type="danger" plain @click="emit('delete')">删除</el-button>
       </el-form-item>
     </el-form>
 
@@ -27,11 +28,6 @@
       <el-table-column prop="ip" label="IP" min-width="120" />
       <el-table-column prop="content" label="描述" min-width="180" />
       <el-table-column prop="createdAt" label="时间" min-width="160" />
-      <el-table-column label="操作" width="100" fixed="right">
-        <template #default>
-          <el-button text type="danger" size="small" @click="emit('delete')">删除</el-button>
-        </template>
-      </el-table-column>
     </el-table>
     <div class="pager">
       <el-pagination

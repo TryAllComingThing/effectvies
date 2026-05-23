@@ -3,8 +3,7 @@
     <el-tab-pane label="业务语义定义" name="biz">
       <el-form inline :model="semanticQuery" class="query-row">
         <el-form-item label="语义名称"><el-input v-model="semanticQuery.name" clearable /></el-form-item>
-        <el-form-item label="关键词"><el-input v-model="semanticQuery.keyword" clearable /></el-form-item>
-        <el-form-item label="科室"><el-input v-model="semanticQuery.deptName" clearable /></el-form-item>
+        <el-form-item label="规则内容"><el-input v-model="semanticQuery.keyword" clearable /></el-form-item>
         <el-form-item label="状态">
           <el-select v-model="semanticQuery.status" clearable style="width: 120px">
             <el-option label="启用" value="enabled" />
@@ -22,8 +21,7 @@
         <el-table-column type="index" width="56" label="#" />
         <el-table-column prop="code" label="语义编码" min-width="120" />
         <el-table-column prop="name" label="语义名称" min-width="130" />
-        <el-table-column prop="keyword" label="关键词" min-width="120" />
-        <el-table-column prop="deptName" label="科室" width="100" />
+        <el-table-column prop="keyword" label="规则内容" min-width="220" />
         <el-table-column label="状态" width="100">
           <template #default="scope"><StatusTag :status="scope.row.status" /></template>
         </el-table-column>
@@ -58,7 +56,6 @@
         <el-form-item label="模板编码"><el-input v-model="sqlQuery.code" clearable /></el-form-item>
         <el-form-item label="模板名称"><el-input v-model="sqlQuery.name" clearable /></el-form-item>
         <el-form-item label="SQL 摘要"><el-input v-model="sqlQuery.sqlBrief" clearable /></el-form-item>
-        <el-form-item label="科室"><el-input v-model="sqlQuery.deptName" clearable /></el-form-item>
         <el-form-item label="状态">
           <el-select v-model="sqlQuery.status" clearable style="width: 120px">
             <el-option label="启用" value="enabled" />
@@ -77,7 +74,6 @@
         <el-table-column prop="code" label="模板编码" min-width="120" />
         <el-table-column prop="name" label="模板名称" min-width="130" />
         <el-table-column prop="sqlBrief" label="SQL 摘要" min-width="180" />
-        <el-table-column prop="deptName" label="科室" width="100" />
         <el-table-column label="状态" width="100">
           <template #default="scope"><StatusTag :status="scope.row.status" /></template>
         </el-table-column>

@@ -1,7 +1,7 @@
 <template>
   <PageContainer title="报告管理">
     <template #actions>
-      <el-button type="primary" @click="openCreateDialog">新建报告</el-button>
+      <el-button type="primary" @click="openCreateDialog">新建</el-button>
     </template>
 
     <el-form inline :model="query" class="query-row">
@@ -39,9 +39,6 @@
         <template #default="scope">{{ formatReportType(scope.row.reportType) }}</template>
       </el-table-column>
       <el-table-column prop="templateName" label="报告模板" min-width="180" />
-      <el-table-column label="科室范围" min-width="180">
-        <template #default="scope">{{ formatDeptNames(scope.row.deptNames) }}</template>
-      </el-table-column>
       <el-table-column prop="creator" label="创建人" width="100" />
       <el-table-column prop="createdAt" label="创建时间" min-width="160" />
       <el-table-column label="状态" width="100">
@@ -56,9 +53,7 @@
           <el-space>
             <el-button text type="primary" size="small" @click="openPreviewDialog(scope.row)">预览</el-button>
             <el-button text type="primary" size="small" @click="refreshStatus(scope.row)">刷新</el-button>
-            <el-button text type="primary" size="small" :disabled="scope.row.status !== 'done'" @click="download(scope.row)">
-              下载文件
-            </el-button>
+            <el-button text type="primary" size="small" :disabled="scope.row.status !== 'done'" @click="download(scope.row)">下载</el-button>
           </el-space>
         </template>
       </el-table-column>
@@ -317,11 +312,6 @@ const noop = () => undefined;
 
 const formatReportType = (value: ExportJobItem['reportType']) =>
   EXPORT_REPORT_TYPE_OPTIONS.find((item) => item.value === value)?.label || value;
-
-const formatDeptNames = (deptNames: string[]) => {
-  if (!deptNames.length || deptNames.length === DEPT_OPTIONS.length) return '全部科室';
-  return deptNames.join('、');
-};
 
 const getSectionDescription = (section: string) => sectionDescriptionMap[section] || '按模板配置输出对应章节内容。';
 

@@ -23,7 +23,7 @@ export const appRoutes: AppRouteRecordRaw[] = [
     path: '/perf-files',
     name: 'PerfFiles',
     component: () => import('@/views/perf-file/PerfFileView.vue'),
-    meta: { title: '绩效文件管理', icon: 'FileSpreadsheet', requiresAuth: true, roles: ['admin'] },
+    meta: { title: '文件管理', icon: 'FileSpreadsheet', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/perf-files/log',
@@ -47,7 +47,7 @@ export const appRoutes: AppRouteRecordRaw[] = [
     path: '/performance',
     name: 'Performance',
     component: () => import('@/views/performance/PerformanceView.vue'),
-    meta: { title: '绩效总览', icon: 'BarChart3', requiresAuth: true, roles: ['admin'] },
+    meta: { title: '绩效数据台账', icon: 'BarChart3', requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/analysis/ask',

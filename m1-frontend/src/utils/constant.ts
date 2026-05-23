@@ -1,6 +1,6 @@
 export const EXPORT_REPORT_TYPE_OPTIONS = [
   { label: '日报', value: 'daily' },
-  { label: '季度报告', value: 'quarter' },
+  { label: '季报', value: 'quarter' },
   { label: '年度报告', value: 'yearly' },
   { label: '当前报告', value: 'current' },
 ] as const;
@@ -19,13 +19,9 @@ export const REPORT_SOURCE_TEXT = '绩效管理已入库数据统计';
 
 export const REPORT_TABLE_HEADERS = [
   '序号',
-  '统计项',
-  '线路',
+  '科室',
+  '类型',
   '统计条数',
   '提报人数',
-  '总分',
-  '平均分',
-  '最高分',
-  '最低分',
-  '优秀条数',
+  '占比',
 ] as const;

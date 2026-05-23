@@ -1,46 +1,54 @@
 import type { MockMethod } from 'vite-plugin-mock';
 
-const DEPT_NAMES: string[] = ['???', '???', '???'];
-const RULE_TAGS: string[] = ['??', '??', '??'];
 const now = '2026-05-17 20:00:00';
 
-const depts: Array<{ id: string; code: string; name: string; parentName: string; status: 'enabled' | 'disabled'; sort: number }> = Array.from({ length: 18 }, (_, i) => ({
-  id: `dept${i + 1}`,
-  code: `D${String(i + 1).padStart(3, '0')}`,
-  name: DEPT_NAMES[i % DEPT_NAMES.length],
-  parentName: '-',
-  status: i % 4 === 0 ? 'disabled' : 'enabled',
-  sort: i + 1,
-}));
+const depts: Array<{ id: string; code: string; name: string; parentName: string; status: 'enabled' | 'disabled'; sort: number }> = [
+  { id: 'dept1', code: 'D001', name: '科室一', parentName: '-', status: 'enabled', sort: 1 },
+  { id: 'dept2', code: 'D002', name: '科室二', parentName: '-', status: 'enabled', sort: 2 },
+  { id: 'dept3', code: 'D003', name: '科室三', parentName: '-', status: 'enabled', sort: 3 },
+];
 
-const rules: Array<{ id: string; name: string; tag: string; content: string; deptName: string; status: 'enabled' | 'disabled'; createdAt: string }> = Array.from({ length: 36 }, (_, i) => ({
-  id: `rule${i + 1}`,
-  name: `??-${i + 1}`,
-  tag: RULE_TAGS[i % RULE_TAGS.length],
-  content: `??????-${i + 1}`,
-  deptName: DEPT_NAMES[i % DEPT_NAMES.length],
-  status: i % 5 === 0 ? 'disabled' : 'enabled',
-  createdAt: now,
-}));
+const rules: Array<{ id: string; name: string; tag: string; content: string; deptName: string; status: 'enabled' | 'disabled'; createdAt: string }> = [
+  {
+    id: 'rule1',
+    name: '关键词',
+    tag: '',
+    content: '完全匹配',
+    deptName: '',
+    status: 'enabled',
+    createdAt: now,
+  },
+  {
+    id: 'rule2',
+    name: '文本相似度',
+    tag: '',
+    content: '相似度95%以上',
+    deptName: '',
+    status: 'enabled',
+    createdAt: now,
+  },
+];
 
-const semantics: Array<{ id: string; code: string; name: string; keyword: string; deptName: string; status: 'enabled' | 'disabled' }> = Array.from({ length: 32 }, (_, i) => ({
-  id: `sem${i + 1}`,
-  code: `SEM${String(i + 1).padStart(3, '0')}`,
-  name: `????-${i + 1}`,
-  keyword: `???${i + 1}`,
-  deptName: DEPT_NAMES[i % DEPT_NAMES.length],
-  status: i % 4 === 0 ? 'disabled' : 'enabled',
-}));
+const semantics: Array<{ id: string; code: string; name: string; keyword: string; deptName: string; status: 'enabled' | 'disabled' }> = [
+  {
+    id: 'sem1',
+    code: 'SEM001',
+    name: '环比',
+    keyword: '按月环比',
+    deptName: '科室一',
+    status: 'enabled',
+  },
+  {
+    id: 'sem2',
+    code: 'SEM002',
+    name: '分析报告',
+    keyword: '对绩效数据从时间、科室进行趋势分析和数据解释',
+    deptName: '科室二',
+    status: 'enabled',
+  },
+];
 
-const sqlTemplates: Array<{ id: string; code: string; name: string; sqlBrief: string; sqlContent: string; deptName: string; status: 'enabled' | 'disabled' }> = Array.from({ length: 26 }, (_, i) => ({
-  id: `sql${i + 1}`,
-  code: `SQL${String(i + 1).padStart(3, '0')}`,
-  name: `????-${i + 1}`,
-  sqlBrief: `??????${i + 1}`,
-  sqlContent: `SELECT id, score FROM performance LIMIT ${10 + (i % 20)}`,
-  deptName: DEPT_NAMES[i % DEPT_NAMES.length],
-  status: i % 4 === 0 ? 'disabled' : 'enabled',
-}));
+const sqlTemplates: Array<{ id: string; code: string; name: string; sqlBrief: string; sqlContent: string; deptName: string; status: 'enabled' | 'disabled' }> = [];
 
 const ok = (data: unknown) => ({ code: 0, message: 'success', traceId: `trace_${Date.now()}`, data });
 const fail = (code: number, message: string) => ({ code, message, traceId: `trace_${Date.now()}`, data: null });
@@ -104,7 +112,7 @@ export default [
     response: ({ url }: { url: string }) => {
       const id = url.split('/api/system/depts/')[1];
       const index = depts.findIndex((d) => d.id === id);
-      if (index < 0) return fail(40441, '?????');
+      if (index < 0) return fail(40441, '科室不存在');
       depts.splice(index, 1);
       return ok(null);
     },
@@ -173,7 +181,7 @@ export default [
     response: ({ url }: { url: string }) => {
       const id = url.split('/api/system/rules/')[1];
       const index = rules.findIndex((r) => r.id === id);
-      if (index < 0) return fail(40442, '?????');
+      if (index < 0) return fail(40442, '规则不存在');
       rules.splice(index, 1);
       return ok(null);
     },
@@ -241,7 +249,7 @@ export default [
     response: ({ url }: { url: string }) => {
       const id = url.split('/api/system/semantics/')[1];
       const index = semantics.findIndex((s) => s.id === id);
-      if (index < 0) return fail(40443, '?????');
+      if (index < 0) return fail(40443, '语义不存在');
       semantics.splice(index, 1);
       return ok(null);
     },
@@ -311,7 +319,7 @@ export default [
     response: ({ url }: { url: string }) => {
       const id = url.split('/api/system/sql-templates/')[1];
       const index = sqlTemplates.findIndex((s) => s.id === id);
-      if (index < 0) return fail(40444, 'SQL ?????');
+      if (index < 0) return fail(40444, 'SQL 模板不存在');
       sqlTemplates.splice(index, 1);
       return ok(null);
     },
