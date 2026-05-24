@@ -8,8 +8,10 @@ const buildFile = (i: number): PerfFileItem => ({
   id: `f${i}`,
   batchNo: `JXData-20260517-${String(i).padStart(8, '0')}`,
   name: `绩效-${reportDate}`,
+  excelTemplate: (['A', 'B', 'C'][i % 3] as PerfFileItem['excelTemplate']),
   format: i % 3 === 0 ? 'zip' : i % 2 === 0 ? 'xls' : 'xlsx',
   parseStatus: ['unparsed', 'parsing', 'success', 'fail'][i % 4] as PerfFileItem['parseStatus'],
+  storageStatus: i % 5 === 0 ? 'stored' : 'unstored',
   uploadedAt: now,
 });
 

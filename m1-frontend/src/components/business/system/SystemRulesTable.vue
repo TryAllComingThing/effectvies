@@ -2,6 +2,12 @@
   <div>
     <el-form inline :model="ruleQuery" class="query-row">
       <el-form-item label="规则名称"><el-input v-model="ruleQuery.name" clearable /></el-form-item>
+      <el-form-item label="类型">
+        <el-select v-model="ruleQuery.type" clearable style="width: 120px">
+          <el-option label="规则" value="rule" />
+          <el-option label="相似度" value="similarity" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="规则内容"><el-input v-model="ruleQuery.content" clearable /></el-form-item>
       <el-form-item label="状态">
         <el-select v-model="ruleQuery.status" clearable style="width: 120px">
@@ -19,11 +25,14 @@
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="name" label="规则名称" min-width="130" />
+      <el-table-column label="类型" width="100">
+        <template #default="scope">{{ scope.row.type === 'similarity' ? '相似度' : '规则' }}</template>
+      </el-table-column>
       <el-table-column prop="content" label="规则内容" min-width="160" />
       <el-table-column label="状态" width="100">
         <template #default="scope"><StatusTag :status="scope.row.status" /></template>
       </el-table-column>
-      <el-table-column label="操作" min-width="240" fixed="right">
+      <el-table-column label="操作" min-width="240" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" @click="emit('view', scope.row)">
@@ -62,6 +71,7 @@ type RuleQuery = {
   pageNum: number;
   pageSize: number;
   name: string;
+  type: string;
   tag: string;
   content: string;
   deptName: string;

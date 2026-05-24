@@ -63,6 +63,30 @@ const dicts: MockDict[] = [
     status: 'enabled',
     remark: '',
   },
+  {
+    id: 'd2',
+    dictType: 'text_form',
+    dictLabel: '文本形式',
+    dictValue: 'text_form',
+    status: 'enabled',
+    remark: '',
+  },
+  {
+    id: 'd3',
+    dictType: 'source_category',
+    dictLabel: '来源分类',
+    dictValue: 'source_category',
+    status: 'enabled',
+    remark: '',
+  },
+  {
+    id: 'd4',
+    dictType: 'content_category',
+    dictLabel: '内容类别',
+    dictValue: 'content_category',
+    status: 'enabled',
+    remark: '',
+  },
 ];
 
 const logs = Array.from({ length: 66 }, (_, i) => ({

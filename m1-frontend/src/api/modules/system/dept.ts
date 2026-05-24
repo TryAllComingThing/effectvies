@@ -6,14 +6,17 @@ export interface DeptItem {
   code: string;
   name: string;
   parentName: string;
+  parentId?: string;
   status: 'enabled' | 'disabled';
   sort: number;
+  children?: DeptItem[];
 }
 
 export type DeptPayload = {
   code: string;
   name: string;
   parentName: string;
+  parentId?: string;
   status: 'enabled' | 'disabled';
   sort: number;
 };

@@ -49,15 +49,14 @@
     <template v-else-if="activeModule === 'depts'">
       <SystemDeptsTable
         :dept-query="deptQuery"
-        :dept-parent-options="deptParentOptions"
         :depts-loading="deptsLoading"
         :depts="depts"
-        :dept-total="deptTotal"
         @search="loadDepts"
         @reset="resetDepts"
         @selection-change="onDeptSelect"
         @create-child="openDeptCreateChildDialog"
         @edit="openEditDialog"
+        @delete="(id) => confirmDelete(id, 'dept')"
         @toggle="toggleDept"
       />
     </template>
@@ -231,7 +230,7 @@ const currentSelectionCount = computed(() => {
   return countMap[activeModule.value] || 0;
 });
 
-const { deptsLoading, depts, deptTotal, selectedDeptIds, deptQuery, deptParentOptions, loadDepts, resetDepts, toggleDept, onDeptSelect } = useSystemDepts();
+const { deptsLoading, depts, selectedDeptIds, deptQuery, deptParentOptions, loadDepts, resetDepts, toggleDept, onDeptSelect } = useSystemDepts();
 
 const { rulesLoading, rules, ruleTotal, selectedRuleIds, ruleQuery, loadRules, resetRules, toggleRule, onRuleSelect } = useSystemRules();
 
@@ -312,6 +311,7 @@ const submitEdit = async () => {
       code: editForm.code || '',
       name: editForm.name || '',
       parentName: editForm.parentName || '',
+      parentId: editForm.parentId || '',
       status: (editForm.status as 'enabled' | 'disabled') || 'enabled',
       sort: Number(editForm.sort || 0),
     };
@@ -331,6 +331,7 @@ const submitEdit = async () => {
   if (activeModule.value === 'rules') {
     const payload = {
       name: editForm.name || '',
+      type: (editForm.type as 'rule' | 'similarity') || 'rule',
       tag: editForm.tag || '',
       content: editForm.content || '',
       deptName: editForm.deptName || '',
@@ -416,7 +417,7 @@ const submitEdit = async () => {
   editVisible.value = false;
 };
 
-const confirmDelete = (id?: string, type?: 'role') => {
+const confirmDelete = (id?: string, type?: 'role' | 'dept') => {
   deleteTarget.value = { id, type };
   deleteVisible.value = true;
 };
@@ -430,17 +431,18 @@ const runDelete = async () => {
     return;
   }
 
+  if (deleteTarget.value.type === 'dept' && deleteTarget.value.id) {
+    await deleteDept(deleteTarget.value.id);
+    ElMessage.success('删除成功');
+    loadDepts();
+    deleteTarget.value = {};
+    return;
+  }
+
   if (activeModule.value === 'users' && editForm.id) {
     await deleteUser(editForm.id);
     ElMessage.success('删除成功');
     loadUsers();
-    return;
-  }
-
-  if (activeModule.value === 'depts' && editForm.id) {
-    await deleteDept(editForm.id);
-    ElMessage.success('删除成功');
-    loadDepts();
     return;
   }
 

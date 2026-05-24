@@ -2,16 +2,41 @@ import type { MockMethod } from 'vite-plugin-mock';
 
 const now = '2026-05-17 20:00:00';
 
-const depts: Array<{ id: string; code: string; name: string; parentName: string; status: 'enabled' | 'disabled'; sort: number }> = [
-  { id: 'dept1', code: 'D001', name: '科室一', parentName: '-', status: 'enabled', sort: 1 },
-  { id: 'dept2', code: 'D002', name: '科室二', parentName: '-', status: 'enabled', sort: 2 },
-  { id: 'dept3', code: 'D003', name: '科室三', parentName: '-', status: 'enabled', sort: 3 },
+const depts: Array<{ id: string; code: string; name: string; parentId: string; parentName: string; status: 'enabled' | 'disabled'; sort: number }> = [
+  { id: 'dept1', code: 'D001', name: '总队', parentId: '0', parentName: '-', status: 'enabled', sort: 1 },
+  { id: 'dept2', code: 'D002', name: '科室一', parentId: 'dept1', parentName: '总队', status: 'enabled', sort: 1 },
+  { id: 'dept3', code: 'D003', name: '科室二', parentId: 'dept1', parentName: '总队', status: 'enabled', sort: 2 },
+  { id: 'dept4', code: 'D004', name: '科室三', parentId: 'dept1', parentName: '总队', status: 'enabled', sort: 3 },
+  { id: 'dept5', code: 'D005', name: '一组', parentId: 'dept2', parentName: '科室一', status: 'enabled', sort: 1 },
 ];
 
-const rules: Array<{ id: string; name: string; tag: string; content: string; deptName: string; status: 'enabled' | 'disabled'; createdAt: string }> = [
+const buildDeptTree = (items: typeof depts) => {
+  const map = new Map<string, (typeof depts)[number] & { children?: Array<(typeof depts)[number] & { children?: unknown[] }> }>();
+  const roots: Array<(typeof depts)[number] & { children?: unknown[] }> = [];
+
+  items.forEach((item) => {
+    map.set(item.id, { ...item, children: [] });
+  });
+
+  map.forEach((item) => {
+    if (!item.parentId || item.parentId === '0' || !map.has(item.parentId)) {
+      roots.push(item);
+      return;
+    }
+
+    map.get(item.parentId)?.children?.push(item);
+  });
+
+  return roots;
+};
+
+const findDeptIdByName = (name: string) => depts.find((item) => item.name === name)?.id || '0';
+
+const rules: Array<{ id: string; name: string; type: 'rule' | 'similarity'; tag: string; content: string; deptName: string; status: 'enabled' | 'disabled'; createdAt: string }> = [
   {
     id: 'rule1',
     name: '关键词',
+    type: 'rule',
     tag: '',
     content: '完全匹配',
     deptName: '',
@@ -21,6 +46,7 @@ const rules: Array<{ id: string; name: string; tag: string; content: string; dep
   {
     id: 'rule2',
     name: '文本相似度',
+    type: 'similarity',
     tag: '',
     content: '相似度95%以上',
     deptName: '',
@@ -64,16 +90,9 @@ export default [
     url: '/api/system/depts',
     method: 'get',
     response: ({ query }: { query: Record<string, string> }) => {
-      const pageNum = Number(query.pageNum || 1);
-      const pageSize = Number(query.pageSize || 10);
       const { code = '', name = '', parentName = '', status = '' } = query;
-      return ok(
-        paginate(
-          depts.filter((d) => d.code.includes(code) && d.name.includes(name) && d.parentName.includes(parentName) && (!status || d.status === status)),
-          pageNum,
-          pageSize
-        )
-      );
+      const filtered = depts.filter((d) => d.code.includes(code) && d.name.includes(name) && d.parentName.includes(parentName) && (!status || d.status === status));
+      return ok({ list: buildDeptTree(filtered), total: filtered.length, pageNum: 1, pageSize: filtered.length });
     },
   },
   {
@@ -84,6 +103,7 @@ export default [
         id: `dept${Date.now()}`,
         code: String(body.code || ''),
         name: String(body.name || ''),
+        parentId: String(body.parentId || findDeptIdByName(String(body.parentName || '')) || '0'),
         parentName: String(body.parentName || '-'),
         status: (body.status as 'enabled' | 'disabled') || 'enabled',
         sort: Number(body.sort || 0),
@@ -100,6 +120,7 @@ export default [
       if (!item) return fail(40441, '科室不存在');
       item.code = String(body.code || '');
       item.name = String(body.name || '');
+      item.parentId = String(body.parentId || findDeptIdByName(String(body.parentName || '')) || '0');
       item.parentName = String(body.parentName || '-');
       item.status = (body.status as 'enabled' | 'disabled') || 'enabled';
       item.sort = Number(body.sort || 0);
@@ -113,6 +134,7 @@ export default [
       const id = url.split('/api/system/depts/')[1];
       const index = depts.findIndex((d) => d.id === id);
       if (index < 0) return fail(40441, '科室不存在');
+      if (depts.some((item) => item.parentId === id)) return fail(40941, '存在下级科室，不可删除');
       depts.splice(index, 1);
       return ok(null);
     },
@@ -134,10 +156,18 @@ export default [
     response: ({ query }: { query: Record<string, string> }) => {
       const pageNum = Number(query.pageNum || 1);
       const pageSize = Number(query.pageSize || 10);
-      const { name = '', tag = '', content = '', deptName = '', status = '' } = query;
+      const { name = '', type = '', tag = '', content = '', deptName = '', status = '' } = query;
       return ok(
         paginate(
-          rules.filter((r) => r.name.includes(name) && r.tag.includes(tag) && r.content.includes(content) && r.deptName.includes(deptName) && (!status || r.status === status)),
+          rules.filter(
+            (r) =>
+              r.name.includes(name) &&
+              (!type || r.type === type) &&
+              r.tag.includes(tag) &&
+              r.content.includes(content) &&
+              r.deptName.includes(deptName) &&
+              (!status || r.status === status),
+          ),
           pageNum,
           pageSize
         )
@@ -151,6 +181,7 @@ export default [
       rules.unshift({
         id: `rule${Date.now()}`,
         name: body.name || '',
+        type: (body.type as 'rule' | 'similarity') || 'rule',
         tag: body.tag || '',
         content: body.content || '',
         deptName: body.deptName || '',
@@ -168,6 +199,7 @@ export default [
       const item = rules.find((r) => r.id === id);
       if (!item) return fail(40442, '规则不存在');
       item.name = body.name || '';
+      item.type = (body.type as 'rule' | 'similarity') || 'rule';
       item.tag = body.tag || '';
       item.content = body.content || '';
       item.deptName = body.deptName || '';

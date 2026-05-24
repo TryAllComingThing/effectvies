@@ -67,7 +67,7 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="320" fixed="right">
+      <el-table-column label="操作" min-width="320" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space wrap>
             <el-button text type="primary" size="small" @click="previewTemplate(scope.row)">预览</el-button>

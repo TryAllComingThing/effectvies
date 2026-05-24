@@ -35,7 +35,7 @@
         <template #default="scope"><StatusTag :status="scope.row.taskStatus" /></template>
       </el-table-column>
       <el-table-column prop="createdAt" label="创建时间" min-width="160" />
-      <el-table-column label="操作" min-width="380" fixed="right">
+      <el-table-column label="操作" min-width="380" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" v-permission="['admin']" @click="runMainAction(scope.row)">
@@ -107,6 +107,7 @@
         <el-table-column type="index" width="56" label="#" />
         <el-table-column prop="sourcePerf" label="源绩效" min-width="200" />
         <el-table-column prop="targetPerf" label="绩效" min-width="200" />
+        <el-table-column prop="matchRule" label="匹配规则" min-width="160" />
         <el-table-column prop="matchResult" label="匹配结果" min-width="140" />
         <el-table-column prop="confidence" label="置信度" width="100" />
         <el-table-column prop="matchedAt" label="匹配时间" min-width="170" />
@@ -144,7 +145,7 @@ const logSummary = reactive({
   progress: 0,
   status: 'pending' as PerfTaskItem['taskStatus'],
 });
-const logRows = ref<Array<{ sourcePerf: string; targetPerf: string; matchResult: string; confidence: string; matchedAt: string }>>([]);
+const logRows = ref<Array<{ sourcePerf: string; targetPerf: string; matchRule: string; matchResult: string; confidence: string; matchedAt: string }>>([]);
 
 const loadData = async () => {
   loading.value = true;
@@ -230,6 +231,7 @@ const openLogDialog = (row: PerfTaskItem) => {
 
   const sourceEvents = ['边境联合巡逻保障', '防空预警演练复盘', '海上编队训练协同', '战备物资调配校验', '应急通信链路测试'];
   const targetEvents = ['边境巡逻保障', '防空演练复盘', '编队海训协同', '战备物资校验', '通信链路测试'];
+  const matchRules = ['关键词匹配', '语义匹配', '文本相似度匹配'];
 
   logRows.value = Array.from({ length: totalCount }, (_, i) => {
     const confidence = Number((0.72 + (i % 20) * 0.01).toFixed(2));
@@ -237,7 +239,8 @@ const openLogDialog = (row: PerfTaskItem) => {
     return {
       sourcePerf: sourceEvents[i % sourceEvents.length],
       targetPerf: targetEvents[i % targetEvents.length],
-      matchResult: matched ? (confidence >= 0.9 ? '匹配成功' : '部分匹配') : '未匹配',
+      matchRule: matchRules[i % matchRules.length],
+      matchResult: matched ? (confidence >= 0.9 ? '精准匹配' : '疑似匹配') : '未匹配',
       confidence: matched ? confidence.toFixed(2) : '0.00',
       matchedAt: matched ? '2026-05-18 10:30:00' : '-',
     };

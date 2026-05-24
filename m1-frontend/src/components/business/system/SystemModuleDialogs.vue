@@ -16,6 +16,13 @@
         <el-select v-if="field.type === 'select'" v-model="editForm[field.key]" style="width: 100%">
           <el-option v-for="option in field.options || []" :key="option.value" :label="option.label" :value="option.value" />
         </el-select>
+        <el-input
+          v-else-if="field.type === 'textarea'"
+          v-model="editForm[field.key]"
+          type="textarea"
+          :rows="4"
+          :placeholder="editMode === 'create' && field.key === 'keyword' ? '自定义问数的业务背景、约束和输出格式' : ''"
+        />
         <el-input v-else v-model="editForm[field.key]" />
       </el-form-item>
     </el-form>
@@ -54,7 +61,7 @@
       </el-table-column>
       <el-table-column prop="remark" label="备注" min-width="140" />
       <el-table-column prop="createdAt" label="创建时间" width="170" />
-      <el-table-column label="操作" width="180" fixed="right">
+      <el-table-column label="操作" width="180" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" @click="$emit('openDictDataEdit', scope.row)">

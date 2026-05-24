@@ -10,38 +10,45 @@
     </template>
 
     <el-form inline :model="query" class="query-row">
-      <el-form-item label="主题"><el-input v-model="query.title" clearable /></el-form-item>
-      <el-form-item label="类型"><el-input v-model="query.routeName" clearable /></el-form-item>
+      <el-form-item label="主题"><el-input v-model="query.title" clearable placeholder="请输入关键词" /></el-form-item>
+      <el-form-item label="类型"><el-input v-model="query.routeName" clearable placeholder="请输入关键词" /></el-form-item>
       <el-form-item label="科室">
         <el-select v-model="query.deptName" clearable>
           <el-option v-for="d in DEPT_OPTIONS" :key="d" :label="d" :value="d" />
         </el-select>
       </el-form-item>
-      <el-form-item label="提报人"><el-input v-model="query.proposer" clearable /></el-form-item>
+      <el-form-item label="提报人"><el-input v-model="query.proposer" clearable placeholder="请输入关键词" /></el-form-item>
       <el-form-item>
         <el-button type="primary" @click="loadData"><ActionIcon name="Search" />查询</el-button>
         <el-button @click="resetQuery"><ActionIcon name="RotateCcw" />重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="rows" size="small" @selection-change="onSelectionChange">
+    <el-table v-loading="loading" :data="rows" size="small" @selection-change="onSelectionChange" @sort-change="onSortChange">
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="title" label="主题" min-width="160" />
       <el-table-column prop="routeName" label="类型" min-width="110" />
+      <el-table-column prop="sourceName" label="数据源" min-width="100" />
       <el-table-column prop="deptName" label="科室" min-width="110" />
       <el-table-column prop="proposer" label="提报人" min-width="100" />
-      <el-table-column prop="confidence" label="置信度" width="90" />
+      <el-table-column prop="confidence" label="置信度" width="90" sortable="custom" />
       <el-table-column prop="eventAt" label="上报时间" min-width="160" />
       <el-table-column prop="parsedAt" label="匹配时间" min-width="160" />
       <el-table-column label="审核状态" width="120">
         <template #default="scope"><StatusTag :status="scope.row.reviewStatus" /></template>
       </el-table-column>
-      <el-table-column label="操作" min-width="340" fixed="right">
+      <el-table-column label="操作" min-width="340" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
-            <el-button text type="success" size="small" v-permission="['admin']" @click="runApprove(scope.row.id)">
-              <ActionIcon name="CheckCircle2" />通过
+            <el-button text type="primary" size="small" v-permission="['admin']" @click="openEdit(scope.row)">
+              <ActionIcon name="Pencil" />修改
+            </el-button>
+            <el-button text type="primary" size="small" @click="openTrace(scope.row)">
+              <ActionIcon name="GitBranch" />溯源
+            </el-button>
+            <el-button text type="success" size="small" v-permission="['admin']" @click="openApprove(scope.row)">
+              <ActionIcon name="CheckCircle2" />审核
             </el-button>
             <el-button text type="danger" size="small" v-permission="['admin']" @click="openReject(scope.row.id)">
               <ActionIcon name="XCircle" />驳回
@@ -90,6 +97,18 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="approveVisible" title="通过审核" width="700px">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="源内容">{{ approveData.sourceContent }}</el-descriptions-item>
+        <el-descriptions-item label="当前内容">{{ approveData.currentContent }}</el-descriptions-item>
+        <el-descriptions-item label="置信度">{{ approveData.confidence }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <el-button @click="approveVisible = false">取消</el-button>
+        <el-button type="primary" @click="runApprove">确认</el-button>
+      </template>
+    </el-dialog>
+
     <el-dialog v-model="detailVisible" title="查看审核详情" width="620px">
       <template v-if="detailItem">
         <el-descriptions :column="2" border>
@@ -100,6 +119,16 @@
           <el-descriptions-item label="主题" :span="2">{{ detailItem.title }}</el-descriptions-item>
           <el-descriptions-item label="内容" :span="2">{{ detailItem.content }}</el-descriptions-item>
         </el-descriptions>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="traceVisible" title="溯源" width="700px">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="源数据内容">{{ traceData.sourceContent }}</el-descriptions-item>
+        <el-descriptions-item label="当前主题内容">{{ traceData.currentContent }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <el-button @click="traceVisible = false">关闭</el-button>
       </template>
     </el-dialog>
   </PageContainer>
@@ -120,11 +149,17 @@ const rows = ref<PerfReviewItem[]>([]);
 const total = ref(0);
 const selectedIds = ref<string[]>([]);
 const query = reactive({ pageNum: 1, pageSize: 10, title: '', routeName: '', deptName: '', proposer: '' });
+const sortState = ref<'ascending' | 'descending' | null>(null);
 const rejectVisible = ref(false);
 const rejectTargetId = ref('');
 const rejectComment = ref('');
+const approveVisible = ref(false);
+const approveTargetId = ref('');
+const approveData = reactive({ sourceContent: '', currentContent: '', confidence: '' });
 const detailVisible = ref(false);
 const detailItem = ref<PerfReviewItem | null>(null);
+const traceVisible = ref(false);
+const traceData = reactive({ sourceContent: '', currentContent: '' });
 const editVisible = ref(false);
 const editMode = ref<'create' | 'edit'>('create');
 const editForm = reactive({ id: '', title: '', content: '', routeName: '', deptName: '', proposer: '' });
@@ -133,11 +168,21 @@ const loadData = async () => {
   loading.value = true;
   try {
     const r = await getReviewList(query);
-    rows.value = r.data.list;
+    const list = [...r.data.list];
+    if (sortState.value) {
+      list.sort((a, b) => (sortState.value === 'ascending' ? a.confidence - b.confidence : b.confidence - a.confidence));
+    }
+    rows.value = list;
     total.value = r.data.total;
   } finally {
     loading.value = false;
   }
+};
+
+const onSortChange = (payload: { prop: string; order: 'ascending' | 'descending' | null }) => {
+  if (payload.prop !== 'confidence') return;
+  sortState.value = payload.order;
+  loadData();
 };
 
 const resetQuery = () => {
@@ -162,10 +207,32 @@ const submitEdit = () => {
   editVisible.value = false;
 };
 
-const runApprove = async (id: string) => {
-  const r = await approveReview(id);
+const openEdit = (row: PerfReviewItem) => {
+  editMode.value = 'edit';
+  Object.assign(editForm, {
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    routeName: row.routeName,
+    deptName: row.deptName,
+    proposer: row.proposer,
+  });
+  editVisible.value = true;
+};
+
+const openApprove = (row: PerfReviewItem) => {
+  approveTargetId.value = row.id;
+  approveData.sourceContent = `源主题：${row.title}；源内容：${row.content}；来源：${row.sourceName}`;
+  approveData.currentContent = `当前主题：${row.title}；内容：${row.content}；来源：${row.sourceName}`;
+  approveData.confidence = String(row.confidence);
+  approveVisible.value = true;
+};
+
+const runApprove = async () => {
+  const r = await approveReview(approveTargetId.value);
   if (r.code === 0) {
     ElMessage.success('审核通过');
+    approveVisible.value = false;
     loadData();
     return;
   }
@@ -195,6 +262,12 @@ const runReject = async () => {
 const openDetail = (row: PerfReviewItem) => {
   detailItem.value = row;
   detailVisible.value = true;
+};
+
+const openTrace = (row: PerfReviewItem) => {
+  traceData.sourceContent = `源主题：${row.title}；源内容：${row.content}；来源：${row.sourceName}`;
+  traceData.currentContent = `当前主题：${row.title}；内容：${row.content}；来源：${row.sourceName}`;
+  traceVisible.value = true;
 };
 
 onMounted(loadData);

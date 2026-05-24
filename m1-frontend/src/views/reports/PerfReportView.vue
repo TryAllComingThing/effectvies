@@ -48,7 +48,7 @@
         <template #default="scope"><el-progress :percentage="scope.row.progress" /></template>
       </el-table-column>
       <el-table-column prop="fileName" label="导出文件" min-width="200" />
-      <el-table-column label="操作" min-width="260" fixed="right">
+      <el-table-column label="操作" min-width="260" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" @click="openPreviewDialog(scope.row)">预览</el-button>

@@ -110,6 +110,12 @@ export const appRoutes: AppRouteRecordRaw[] = [
     meta: { title: '语义管理', icon: 'BookOpenText', requiresAuth: true, roles: ['admin'] },
   },
   {
+    path: '/system/score-model',
+    name: 'SystemScoreModel',
+    component: () => import('@/views/system/SystemScoreModelView.vue'),
+    meta: { title: '评分模型', icon: 'Scale', requiresAuth: true, roles: ['admin'] },
+  },
+  {
     path: '/system/dicts',
     name: 'SystemDicts',
     component: () => import('@/views/system/SystemDictsView.vue'),

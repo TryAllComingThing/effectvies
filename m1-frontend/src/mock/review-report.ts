@@ -29,6 +29,7 @@ const MILITARY_TYPES = [
 
 const reviewDb: PerfReviewItem[] = Array.from({ length: 54 }, (_, idx) => ({
   id: `r${idx + 1}`,
+  sourceName: idx % 2 === 0 ? '源1' : '源2',
   title: MILITARY_EVENTS[idx % MILITARY_EVENTS.length],
   content: `绩效内容描述-${idx + 1}`,
   routeName: MILITARY_TYPES[idx % MILITARY_TYPES.length],
@@ -44,8 +45,15 @@ const reviewDb: PerfReviewItem[] = Array.from({ length: 54 }, (_, idx) => ({
   sourceBatchNo: `JXData-20260517-${String(idx + 1).padStart(8, '0')}`,
 }));
 
+reviewDb.unshift({
+  ...reviewDb[0],
+  id: 'r_dup_1',
+  proposer: '李四',
+});
+
 const performanceDb: PerformanceItem[] = Array.from({ length: 36 }, (_, idx) => ({
   id: `p${idx + 1}`,
+  sourceName: idx % 2 === 0 ? '源1' : '源2',
   title: MILITARY_EVENTS[idx % MILITARY_EVENTS.length],
   content: `绩效内容描述-${idx + 1}`,
   routeName: MILITARY_TYPES[idx % MILITARY_TYPES.length],
@@ -59,6 +67,12 @@ const performanceDb: PerformanceItem[] = Array.from({ length: 36 }, (_, idx) => 
   sourceBatchNo: `JXData-20260517-${String(idx + 101).padStart(8, '0')}`,
   matchedAt: now,
 }));
+
+performanceDb.unshift({
+  ...performanceDb[0],
+  id: 'p_dup_1',
+  proposer: '李四',
+});
 
 const exportJobs: ExportJobItem[] = [];
 

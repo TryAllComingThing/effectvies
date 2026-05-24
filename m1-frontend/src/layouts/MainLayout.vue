@@ -310,6 +310,7 @@ const menuGroups = computed<MenuGroup[]>(() => {
         { path: '/system/roles', title: '角色管理', icon: 'ShieldCheck' },
         { path: '/system/rules', title: '规则管理', icon: 'FileCode2' },
         { path: '/system/semantic', title: '语义管理', icon: 'BookOpenText' },
+        { path: '/system/score-model', title: '评分模型', icon: 'Scale' },
         { path: '/system/dicts', title: '字典管理', icon: 'Database' },
         { path: '/system/logs', title: '日志管理', icon: 'ScrollText' },
         { path: '/system/platform', title: '平台配置', icon: 'PanelsTopLeft' },

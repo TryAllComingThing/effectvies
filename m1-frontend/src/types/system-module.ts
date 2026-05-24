@@ -3,13 +3,13 @@ export type EditMode = 'create' | 'edit';
 export type RowValue = Record<PropertyKey, unknown>;
 export type DeleteTarget = {
   id?: string;
-  type?: 'role';
+  type?: 'role' | 'dept';
 };
 
 export type EditField = {
   key: string;
   label: string;
-  type?: 'input' | 'select';
+  type?: 'input' | 'select' | 'textarea';
   options?: Array<{ label: string; value: string }>;
 };
 

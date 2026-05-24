@@ -3,6 +3,9 @@
     <template #actions>
       <el-space>
         <el-button type="primary" v-permission="['admin']" @click="openCreate"><ActionIcon name="Plus" />上传</el-button>
+        <el-button v-permission="['admin']" @click="openFtpUpload">
+          <ActionIcon name="Server" />FTP上传
+        </el-button>
         <el-button type="danger" plain :disabled="!selectedIds.length" v-permission="['admin']" @click="batchDelete">
           <ActionIcon name="Trash2" />删除
         </el-button>
@@ -36,6 +39,9 @@
       <el-table-column type="selection" width="45" />
       <el-table-column type="index" width="56" label="#" />
       <el-table-column prop="name" label="名称" min-width="140" />
+      <el-table-column prop="excelTemplate" label="Excel模板" width="110">
+        <template #default="scope">{{ scope.row.excelTemplate }}模板</template>
+      </el-table-column>
       <el-table-column prop="format" label="格式" width="90" />
       <el-table-column label="上报时间" min-width="120">
         <template #default="scope">{{ String(scope.row.uploadedAt || '').slice(0, 10) }}</template>
@@ -44,11 +50,28 @@
       <el-table-column label="解析状态" width="120">
         <template #default="scope"><StatusTag :status="scope.row.parseStatus" /></template>
       </el-table-column>
-      <el-table-column label="操作" min-width="460" fixed="right">
+      <el-table-column label="入库状态" width="120">
+        <template #default="scope">
+          <el-tag :type="isStored(scope.row) ? 'success' : 'info'">
+            {{ isStored(scope.row) ? '已入库' : '未入库' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" min-width="460" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" v-permission="['admin']" @click="runParse(scope.row.id)">
               <ActionIcon name="WandSparkles" />解析
+            </el-button>
+            <el-button
+              text
+              type="primary"
+              size="small"
+              v-permission="['admin']"
+              :disabled="scope.row.parseStatus !== 'success' || isStored(scope.row)"
+              @click="runStore(scope.row)"
+            >
+              <ActionIcon name="Database" />{{ isStored(scope.row) ? '已入库' : '入库' }}
             </el-button>
             <el-button text type="primary" size="small" v-permission="['admin']" @click="openEdit(scope.row)">
               <ActionIcon name="Pencil" />编辑
@@ -84,6 +107,13 @@
         <el-form-item label="名称">
           <el-input v-model="createForm.name" placeholder="请输入文件名称" />
         </el-form-item>
+        <el-form-item label="模板">
+          <el-select v-model="createForm.excelTemplate" style="width: 100%">
+            <el-option label="A模板" value="A" />
+            <el-option label="B模板" value="B" />
+            <el-option label="C模板" value="C" />
+          </el-select>
+        </el-form-item>
       </el-form>
       <el-upload drag :auto-upload="false" :show-file-list="true" :on-change="onCreateFileChange" :limit="1">
         <el-icon><upload-filled /></el-icon>
@@ -98,6 +128,13 @@
     <el-dialog v-model="editVisible" title="编辑文件" width="480px">
       <el-form :model="editForm" label-width="90px">
         <el-form-item label="名称"><el-input v-model="editForm.name" /></el-form-item>
+        <el-form-item label="Excel模板">
+          <el-select v-model="editForm.excelTemplate" style="width:100%">
+            <el-option label="A模板" value="A" />
+            <el-option label="B模板" value="B" />
+            <el-option label="C模板" value="C" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="格式">
           <el-select v-model="editForm.format" style="width:100%">
             <el-option label="xls" value="xls" />
@@ -120,6 +157,54 @@
       <template #footer>
         <el-button @click="coverVisible = false">取消</el-button>
         <el-button type="primary" @click="submitCover">确认</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="ftpVisible" title="FTP上传" width="860px">
+      <el-form :model="ftpConfig" label-width="96px" class="ftp-config-form">
+        <el-row :gutter="12">
+          <el-col :span="12">
+            <el-form-item label="服务器地址"><el-input v-model="ftpConfig.host" placeholder="如：192.168.1.10" /></el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="端口"><el-input v-model="ftpConfig.port" placeholder="21" /></el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="用户名"><el-input v-model="ftpConfig.username" /></el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="密码"><el-input v-model="ftpConfig.password" type="password" show-password /></el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="远程目录"><el-input v-model="ftpConfig.remotePath" placeholder="/upload/perf" /></el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Excel模板">
+              <el-select v-model="ftpConfig.excelTemplate" style="width: 100%">
+                <el-option label="A模板" value="A" />
+                <el-option label="B模板" value="B" />
+                <el-option label="C模板" value="C" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <div class="ftp-file-head">
+        <span>文件列表</span>
+        <el-button size="small" @click="refreshFtpFiles">刷新</el-button>
+      </div>
+      <el-table :data="ftpFiles" size="small" @selection-change="onFtpSelect">
+        <el-table-column type="selection" width="45" />
+        <el-table-column prop="name" label="文件名" min-width="260" />
+        <el-table-column prop="size" label="大小" width="120" />
+        <el-table-column prop="modifiedAt" label="更新时间" min-width="170" />
+      </el-table>
+
+      <template #footer>
+        <el-button @click="ftpVisible = false">取消</el-button>
+        <el-button @click="todo('测试连接')">测试连接</el-button>
+        <el-button type="primary" :disabled="!selectedFtpFiles.length" @click="submitFtpUpload">上传到系统</el-button>
       </template>
     </el-dialog>
 
@@ -165,12 +250,23 @@ const query = reactive({ pageNum: 1, pageSize: 10, name: '', format: '', parseSt
 
 const createVisible = ref(false);
 const createFile = ref<File | null>(null);
-const createForm = reactive({ name: '' });
+const createForm = reactive({ name: '', excelTemplate: 'A' as 'A' | 'B' | 'C' });
 const editVisible = ref(false);
-const editForm = reactive({ id: '', name: '', format: 'xlsx' as 'xls' | 'xlsx' | 'zip' });
+const editForm = reactive({ id: '', name: '', excelTemplate: 'A' as 'A' | 'B' | 'C', format: 'xlsx' as 'xls' | 'xlsx' | 'zip' });
 const coverVisible = ref(false);
 const coverFile = ref<File | null>(null);
 const coverTargetId = ref('');
+const ftpVisible = ref(false);
+const ftpConfig = reactive({
+  host: '192.168.1.10',
+  port: '21',
+  username: 'ftp_user',
+  password: '',
+  remotePath: '/upload/perf',
+  excelTemplate: 'A' as 'A' | 'B' | 'C',
+});
+const ftpFiles = ref<Array<{ name: string; size: string; modifiedAt: string }>>([]);
+const selectedFtpFiles = ref<Array<{ name: string; size: string; modifiedAt: string }>>([]);
 const logVisible = ref(false);
 const logSummary = reactive({
   fileName: '-',
@@ -194,7 +290,10 @@ const loadData = async () => {
   loading.value = true;
   try {
     const res = await getPerfFileList(query);
-    rows.value = res.data.list;
+    rows.value = res.data.list.map((item) => ({
+      ...item,
+      storageStatus: item.parseStatus === 'success' ? item.storageStatus : 'unstored',
+    }));
     total.value = res.data.total;
   } finally {
     loading.value = false;
@@ -205,6 +304,8 @@ const onSelectionChange = (selection: PerfFileItem[]) => {
   selectedIds.value = selection.map((item) => item.id);
 };
 
+const todo = (name: string) => ElMessage.info(`${name}功能待对接`);
+
 const resetQuery = () => {
   Object.assign(query, { pageNum: 1, pageSize: 10, name: '', format: '', parseStatus: '' });
   loadData();
@@ -213,6 +314,7 @@ const resetQuery = () => {
 const openCreate = () => {
   createFile.value = null;
   createForm.name = '';
+  createForm.excelTemplate = 'A';
   createVisible.value = true;
 };
 
@@ -237,7 +339,7 @@ const submitCreate = () => {
 };
 
 const openEdit = (row: PerfFileItem) => {
-  Object.assign(editForm, { id: row.id, name: row.name, format: row.format });
+  Object.assign(editForm, { id: row.id, name: row.name, excelTemplate: row.excelTemplate, format: row.format });
   editVisible.value = true;
 };
 
@@ -251,6 +353,29 @@ const openCover = (row: PerfFileItem) => {
   coverTargetId.value = row.id;
   coverFile.value = null;
   coverVisible.value = true;
+};
+
+const openFtpUpload = () => {
+  ftpVisible.value = true;
+  refreshFtpFiles();
+};
+
+const refreshFtpFiles = () => {
+  ftpFiles.value = [
+    { name: '绩效-2026-05-22.xlsx', size: '1.8MB', modifiedAt: '2026-05-22 11:20:00' },
+    { name: '绩效-2026-05-23.xlsx', size: '1.9MB', modifiedAt: '2026-05-23 09:45:00' },
+    { name: '绩效-2026-05-24.zip', size: '6.2MB', modifiedAt: '2026-05-24 08:10:00' },
+  ];
+};
+
+const onFtpSelect = (items: Array<{ name: string; size: string; modifiedAt: string }>) => {
+  selectedFtpFiles.value = items;
+};
+
+const submitFtpUpload = () => {
+  ElMessage.success(`已从FTP导入 ${selectedFtpFiles.value.length} 个文件（模拟）`);
+  ftpVisible.value = false;
+  loadData();
 };
 
 const onCoverFileChange = (file: { raw?: File }) => {
@@ -283,6 +408,23 @@ const runParse = async (id: string) => {
   }
 
   ElMessage.warning(res.message);
+};
+
+const isStored = (row: PerfFileItem) => row.parseStatus === 'success' && row.storageStatus === 'stored';
+
+const runStore = (row: PerfFileItem) => {
+  if (row.parseStatus !== 'success') {
+    ElMessage.warning('解析成功后才可入库');
+    return;
+  }
+
+  if (isStored(row)) {
+    ElMessage.info('该文件已入库');
+    return;
+  }
+
+  row.storageStatus = 'stored';
+  ElMessage.success('入库成功');
 };
 
 const runDelete = async (id: string) => {
@@ -346,6 +488,8 @@ onMounted(loadData);
 .pager { margin-top: 0.8rem; display: flex; justify-content: flex-end; }
 .summary-row { margin-bottom: 10px; }
 .progress-card { margin-bottom: 10px; }
+.ftp-config-form { margin-bottom: 8px; }
+.ftp-file-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .k { color: #5f6b7a; font-size: 13px; }
 .v { margin-top: 4px; font-size: 18px; font-weight: 600; color: #1f2d3d; }
 </style>

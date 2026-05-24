@@ -23,7 +23,7 @@
       <el-table-column label="状态" width="100">
         <template #default="scope"><StatusTag :status="scope.row.status" /></template>
       </el-table-column>
-      <el-table-column label="操作" min-width="300" fixed="right">
+      <el-table-column label="操作" min-width="300" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" @click="emit('edit', scope.row)">

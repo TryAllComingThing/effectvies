@@ -4,6 +4,7 @@ import type { ApiResult, PageResult } from '@/types';
 export interface RuleItem {
   id: string;
   name: string;
+  type: 'rule' | 'similarity';
   tag: string;
   content: string;
   deptName: string;
@@ -13,6 +14,7 @@ export interface RuleItem {
 
 export type RulePayload = {
   name: string;
+  type: 'rule' | 'similarity';
   tag: string;
   content: string;
   deptName: string;

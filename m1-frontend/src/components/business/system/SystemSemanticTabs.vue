@@ -3,7 +3,7 @@
     <el-tab-pane label="业务语义定义" name="biz">
       <el-form inline :model="semanticQuery" class="query-row">
         <el-form-item label="语义名称"><el-input v-model="semanticQuery.name" clearable /></el-form-item>
-        <el-form-item label="规则内容"><el-input v-model="semanticQuery.keyword" clearable /></el-form-item>
+        <el-form-item label="语义内容"><el-input v-model="semanticQuery.keyword" clearable /></el-form-item>
         <el-form-item label="状态">
           <el-select v-model="semanticQuery.status" clearable style="width: 120px">
             <el-option label="启用" value="enabled" />
@@ -21,11 +21,11 @@
         <el-table-column type="index" width="56" label="#" />
         <el-table-column prop="code" label="语义编码" min-width="120" />
         <el-table-column prop="name" label="语义名称" min-width="130" />
-        <el-table-column prop="keyword" label="规则内容" min-width="220" />
+        <el-table-column prop="keyword" label="语义内容" min-width="220" />
         <el-table-column label="状态" width="100">
           <template #default="scope"><StatusTag :status="scope.row.status" /></template>
         </el-table-column>
-        <el-table-column label="操作" min-width="220" fixed="right">
+        <el-table-column label="操作" min-width="220" fixed="right" class-name="table-action-cell">
           <template #default="scope">
             <el-space>
               <el-button text type="primary" size="small" @click="emit('semantic-edit', scope.row)">
@@ -77,7 +77,7 @@
         <el-table-column label="状态" width="100">
           <template #default="scope"><StatusTag :status="scope.row.status" /></template>
         </el-table-column>
-        <el-table-column label="操作" min-width="260" fixed="right">
+        <el-table-column label="操作" min-width="260" fixed="right" class-name="table-action-cell">
           <template #default="scope">
             <el-space>
               <el-button text type="primary" size="small" @click="emit('sql-edit', scope.row)">

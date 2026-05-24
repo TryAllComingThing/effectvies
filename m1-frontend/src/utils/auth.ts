@@ -27,6 +27,7 @@ const ADMIN_ROUTE_NAMES = [
   'SystemRoles',
   'SystemRules',
   'SystemSemantic',
+  'SystemScoreModel',
   'SystemDicts',
   'SystemLogs',
   'SystemPlatform',

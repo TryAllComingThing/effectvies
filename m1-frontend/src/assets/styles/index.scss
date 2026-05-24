@@ -209,6 +209,18 @@ body {
   gap: 6px !important;
 }
 
+.el-table .table-action-cell .cell {
+  display: flex;
+  align-items: center;
+  min-height: 100%;
+}
+
+.el-table .table-action-cell .el-space,
+.el-table .table-action-cell .el-space__item {
+  display: inline-flex;
+  align-items: center;
+}
+
 .el-card {
   border: 1px solid #e9eef5;
   box-shadow: 0 6px 20px rgba(25, 45, 79, 0.05);

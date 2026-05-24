@@ -16,8 +16,10 @@ export interface PerfFileItem {
   id: string;
   batchNo: string;
   name: string;
+  excelTemplate: 'A' | 'B' | 'C';
   format: 'xls' | 'xlsx' | 'zip';
   parseStatus: 'unparsed' | 'parsing' | 'success' | 'fail';
+  storageStatus: 'unstored' | 'stored';
   uploadedAt: string;
 }
 
@@ -34,6 +36,7 @@ export interface PerfTaskItem {
 
 export interface PerfReviewItem {
   id: string;
+  sourceName: string;
   title: string;
   content: string;
   routeName: string;
@@ -50,6 +53,7 @@ export interface PerfReviewItem {
 }
 
 export interface PerformanceItem extends Omit<PerfReviewItem, 'reviewStatus' | 'reviewComment'> {
+  sourceName: string;
   matchedAt: string;
 }
 

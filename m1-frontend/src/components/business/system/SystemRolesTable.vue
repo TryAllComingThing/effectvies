@@ -15,7 +15,7 @@
       <el-table-column prop="roleCode" label="角色编码" min-width="120" />
       <el-table-column prop="roleName" label="角色名称" min-width="120" />
       <el-table-column prop="userCount" label="关联人数" width="100" />
-      <el-table-column label="操作" width="220" fixed="right">
+      <el-table-column label="操作" width="220" fixed="right" class-name="table-action-cell">
         <template #default="scope">
           <el-space>
             <el-button text type="primary" size="small" @click="emit('view', scope.row)">
